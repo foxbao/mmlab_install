@@ -1,7 +1,5 @@
 [TOC] 
 
-https://blog.csdn.net/weixin_42545475/article/details/132422665
-
 https://mmcv.readthedocs.io/en/v1.5.0/get_started/installation.html
 
 # Install gcc 8 and g++ 8
@@ -36,14 +34,24 @@ sudo sh cuda_11.3.0_465.19.01_linux.run
 
 # Create the conda environment
 ```
-conda create -n detr3d python=3.8 -y
-conda activate detr3d
+conda create -n mmdetection_v1.0.0rc6 python=3.8 -y
+conda activate mmdetection_v1.0.0rc6
 ```
 
 # Install Pytroch 11.1
 ```
 conda install pytorch==1.11.0 torchvision==0.12.0 torchaudio==0.11.0 cudatoolkit=11.3 -c pytorch
 
+```
+
+# Install mmcv v1.7.0
+
+```
+pip install mmcv-full==1.7.0 -f https://download.openmmlab.com/mmcv/dist/cu113/torch1.11/index.html
+git clone https://github.com/open-mmlab/mmcv.git
+git tag
+git checkout -b v1.7.0 v1.7.0
+pip install -v -e .
 ```
 
 # Something important to avoid bug 
@@ -53,11 +61,16 @@ pip install numpy==1.23.5
 pip install yapf==0.40.1
 ```
 
-# Install mmdetection 2.28.1
+
+
+
+# Install mmdet
 ```
 pip install -U openmim
-mim install mmdet==2.28.1
+mim install mmdet==2.28.0
 ```
+
+
 
 # Download mmdetection3d v1.0.0rc6
 ```
@@ -85,23 +98,12 @@ git checkout -b v2.28.0 v2.28.0
 pip install -v -e .
 ```
 
-# Download and Install mmengine
+# Download and Install mmengine 0.7.1
 ```
 git clone https://github.com/open-mmlab/mmengine.git
 cd mmengine
-pip install -v -e .
-```
-
-
-# Install mmcv v1.6.0
-
-```
-pip install mmcv-full==1.6.0 -f https://download.openmmlab.com/mmcv/dist/cu113/torch1.11/index.html
-
-
-git clone https://github.com/open-mmlab/mmcv.git
 git tag
-git checkout -b v1.7.0 v1.7.0
+git checkout -b v0.7.1 v0.7.1
 pip install -v -e .
 ```
 

@@ -27,19 +27,15 @@ sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 100
 
 # Install CUDA 11.3
 ```
-
-
 wget https://developer.download.nvidia.com/compute/cuda/11.3.0/local_installers/cuda_11.3.0_465.19.01_linux.run
 sudo sh cuda_11.3.0_465.19.01_linux.run
 
 ```
 
-
-
 # Create the conda environment
 ```
-conda create -n mmdetection_v1.0.0rc6 python=3.8 -y
-conda activate mmdetection_v1.0.0rc6
+conda create -n mmdetection_v1.1.0 python=3.8 -y
+conda activate mmdetection_v1.1.0
 ```
 
 # Install Pytroch 11.1
@@ -48,80 +44,59 @@ conda install pytorch==1.11.0 torchvision==0.12.0 torchaudio==0.11.0 cudatoolkit
 
 ```
 
-# Install dependencies
-```
-conda install pytorch==1.10.0 torchvision==0.11.0 cudatoolkit=11.3 -c pytorch -c conda-forge
-pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
-```
 # Install mmcv
 
 ```
+pip install mmcv-full==2.0.0 -f https://download.openmmlab.com/mmcv/dist/cu113/torch1.11/index.html
 
-git clone https://github.com/open-mmlab/mmcv.git
-cd mmcv
-git tag
-git checkout -b v1.7.0 v1.7.0
-
-pip install -v -e .
 ```
 
-# Install mmdetection3d
+# Install mmdet
+```
+pip install -U openmim
+mim install mmdet==3.0.0
+```
+
+
+
+# Download mmdetection3d v1.1.0
 ```
 git clone https://github.com/open-mmlab/mmdetection3d.git
 cd mmdetection3d
 git tag
 git checkout -b v1.1.0 v1.1.0
+```
+
+# Download and Install mmseg 0.30.0
+```
+git clone https://github.com/open-mmlab/mmsegmentation.git
+cd mmsegmentation
+git tag
+git checkout -b v0.30.0 v0.30.0
 pip install -v -e .
 ```
 
-# Install mmdetection
+# Download and Install mmdetection 3.0.0
 ```
-        
-`
-pip install opencv-python
-pip install openmim
-mim install "mmcv==1.7.0"
-```
-
-# Download mmdetection3d v1.1.0
-```
-git clone https://github.com/open-mmlab/mmdetection3d
-git tag
-git checkout -b v1.1.0 v1.1.0
-```
-# Install mmengine
-Download and Install mmengine from source code inside the folder of mmdetection3d
-
-```
-mim install mmengine
-
-cd mmdetection3d
-git clone https://github.com/open-mmlab/mmengine.git
-cd mmengine
-pip install -e . -v
-```
-# Install mmdetection v2.28.0
-Download and install mmdetection from source code inside the folder of mmdetection3d
-```
-cd mmdetection3d
 git clone https://github.com/open-mmlab/mmdetection.git
 cd mmdetection
 git tag
-git checkout -b v2.28.0 v2.28.0
+git checkout -b v3.0.0 v3.0.0
 pip install -v -e .
 ```
 
-# Install mmseg
+# Download and Install mmengine 0.7.1
 ```
-pip install "mmsegmentation>==0.30.0"
-
+git clone https://github.com/open-mmlab/mmengine.git
+cd mmengine
+git tag
+git checkout -b v0.7.1 v0.7.1
+pip install -v -e .
 ```
 
-# Install mmdetection3d v1.0.0rc6
+# Install mmdetection3d v1.1.0
 ```
 cd mmdetection3d
-git tag 
-git checkout -b v1.0.0rc6 v1.0.0rc6
 pip install -v -e .
 ```
 
