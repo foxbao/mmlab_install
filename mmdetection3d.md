@@ -4,6 +4,12 @@
 conda create --name mmdetection3d python=3.8 -y
 conda activate mmdetection3d
 ```
+# Something important to avoid bug 
+https://github.com/open-mmlab/mmdetection/issues/10962
+```
+pip install numpy==1.23.5
+pip install yapf==0.40.1
+```
 
 # Install PyTorch
 ```
