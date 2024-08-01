@@ -31,7 +31,6 @@ sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 100
 ```
 wget https://developer.download.nvidia.com/compute/cuda/11.3.0/local_installers/cuda_11.3.0_465.19.01_linux.run
 sudo sh cuda_11.3.0_465.19.01_linux.run
-
 ```
 
 # Create the conda environment
@@ -46,6 +45,12 @@ conda install pytorch==1.11.0 torchvision==0.12.0 torchaudio==0.11.0 cudatoolkit
 
 ```
 
+# Download detr3d
+```
+git clone https://github.com/WangYueFt/detr3d.git
+
+```
+
 # Something important to avoid bug 
 https://github.com/open-mmlab/mmdetection/issues/10962
 ```
@@ -53,15 +58,19 @@ pip install numpy==1.23.5
 pip install yapf==0.40.1
 ```
 
-# Install mmdetection 2.28.1
-```
-pip install -U openmim
-mim install mmdet==2.28.1
-```
-
 # Download mmdetection3d v1.0.0rc6
+We can use the submodule of mmdetection3d in detr, with
+```
+git submodule init
+git submodule update
+```
+Or download it from github
 ```
 git clone https://github.com/open-mmlab/mmdetection3d.git
+```
+
+change tag
+```
 cd mmdetection3d
 git tag
 git checkout -b v1.0.0rc6 v1.0.0rc6
@@ -85,10 +94,12 @@ git checkout -b v2.28.0 v2.28.0
 pip install -v -e .
 ```
 
-# Download and Install mmengine
+# Download and Install mmengine 0.7.1
 ```
 git clone https://github.com/open-mmlab/mmengine.git
 cd mmengine
+git tag
+git checkout -b v0.7.1 v0.7.1
 pip install -v -e .
 ```
 
@@ -97,12 +108,6 @@ pip install -v -e .
 
 ```
 pip install mmcv-full==1.6.0 -f https://download.openmmlab.com/mmcv/dist/cu113/torch1.11/index.html
-
-
-git clone https://github.com/open-mmlab/mmcv.git
-git tag
-git checkout -b v1.7.0 v1.7.0
-pip install -v -e .
 ```
 
 # Install mmdetection3d v1.0.0rc6
@@ -120,18 +125,45 @@ assert (mmcv_version >= digit_version(mmcv_minimum_version)
         and mmcv_version <= digit_version(mmcv_maximum_version))
 ```
 
-# Verification
+# process nuscene data
+https://mmdetection3d.readthedocs.io/zh-cn/latest/advanced_guides/datasets/nuscenes.html
 ```
-conda install -c conda-forge libstdcxx-ng
-mim download mmdet3d --config pointpillars_hv_secfpn_8xb6-160e_kitti-3d-car --dest .
-python demo/pcd_demo.py demo/data/kitti/000008.bin pointpillars_hv_secfpn_8xb6-160e_kitti-3d-car.py hv_pointpillars_secfpn_6x8_160e_kitti-3d-car_20220331_134606-d42d15ed.pth --show
+python tools/create_data.py nuscenes --root-path ./data/nuscenes --out-dir ./data/nuscenes --extra-tag nuscenes
 ```
+
+remember to uncomment line 224 in create_data.py
+
+# Download pretrained backbone
+
+# train on nuscenes data with one GPU
+```
+python train.py 
+```
+
+```
+"args": ["projects/configs/detr3d/detr3d_res101_gridmask.py","--cfg-options","load_from=pretrained/fcos3d.pth","--gpus","1"],
+
+```
+
+# Train on nuscenes data with multiple gpu
+https://blog.csdn.net/XCCCCZ/article/details/134295931
+We need to first change the nuscenes a little bit 
+/home/ubuntu/anaconda3/envs/detr3d/lib/python3.8/site-packages/nuscenes/eval/detection/data_classes.py
+line 39
+```
+# self.class_names = self.class_range.keys()
+self.class_names = list(self.class_range.keys())
+```
+Then Run the training code
+```
+tools/dist_train.sh projects/configs/detr3d/detr3d_res101_gridmask.py 2
+```
+
 
 # Test on nuscenes data
 
 https://blog.csdn.net/Furtherisxgi/article/details/130118952
 ```
-
 bash ./tools/dist_test.sh configs/pointpillars/pointpillars_hv_secfpn_sbn-all_8xb4-2x_nus-3d.py checkpoints/hv_pointpillars_fpn_sbn-all_4x8_2x_nus-3d_20210826_104936-fca299c1.pth 1 --eval bbox
 
 ```
