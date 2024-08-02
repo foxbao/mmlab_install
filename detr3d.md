@@ -39,9 +39,17 @@ conda create -n detr3d python=3.8 -y
 conda activate detr3d
 ```
 
-# Install Pytroch 11.1
+# Install Pytroch 1.9.0 based on cuda 11.3
+
 ```
-conda install pytorch==1.11.0 torchvision==0.12.0 torchaudio==0.11.0 cudatoolkit=11.3 -c pytorch
+pip install torch==1.9.0+cu111 torchvision==0.10.0+cu111 torchaudio==0.9.0 -f https://download.pytorch.org/whl/torch_stable.html
+
+
+
+import torch # 如果pytorch安装成功即可导入
+print(torch.cuda.is_available()) # 查看CUDA是否可用
+print(torch.cuda.device_count()) # 查看可用的CUDA数量
+print(torch.version.cuda) # 查看CUDA的版本号
 
 ```
 
@@ -107,7 +115,7 @@ pip install -v -e .
 # Install mmcv v1.6.0
 
 ```
-pip install mmcv-full==1.6.0 -f https://download.openmmlab.com/mmcv/dist/cu113/torch1.11/index.html
+pip install mmcv-full==1.6.0
 ```
 
 # Install mmdetection3d v1.0.0rc6
@@ -117,13 +125,16 @@ pip install -v -e .
 ```
 
 
-In case there is an error saying the mmcv version is too high, we can change the following file to remove the error
-mmdet/__init__.py
-line 16
-```
-assert (mmcv_version >= digit_version(mmcv_minimum_version)
-        and mmcv_version <= digit_version(mmcv_maximum_version))
-```
+In case there is an error saying the mmcv version 1.6.0 is too high, we can change the following file to remove the error
+mmdetection3d/mmdet3d/__init__.py
+line 22
+mmcv_maximum_version = '1.4.0'=>mmcv_maximum_version = '1.6.0'
+
+# Verification of mmdection3d
+conda install -c conda-forge libstdcxx-ng
+pip install -U openmim
+mim download mmdet3d --config pointpillars_hv_secfpn_8xb6-160e_kitti-3d-car --dest .
+python demo/pcd_demo.py demo/data/kitti/000008.bin pointpillars_hv_secfpn_8xb6-160e_kitti-3d-car.py hv_pointpillars_secfpn_6x8_160e_kitti-3d-car_20220331_134606-d42d15ed.pth --show
 
 # process nuscene data
 https://mmdetection3d.readthedocs.io/zh-cn/latest/advanced_guides/datasets/nuscenes.html
