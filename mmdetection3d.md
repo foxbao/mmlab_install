@@ -1,4 +1,6 @@
 [TOC] 
+
+https://blog.csdn.net/qq_44703886/article/details/131732662
 # Create the conda environment
 ```
 conda create --name mmdetection3d python=3.8 -y
@@ -13,7 +15,11 @@ pip install yapf==0.40.1
 
 # Install PyTorch
 ```
+
+
 pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+
+pip install nvidia_cudnn_cu12-9.1.0.70-py3-none-manylinux2014_x86_64.whl
 ```
 # Install mmcv
 
@@ -58,6 +64,9 @@ line 16
 assert (mmcv_version >= digit_version(mmcv_minimum_version)
         and mmcv_version <= digit_version(mmcv_maximum_version))
 ```
+
+# aaaa
+unset LD_LIBRARY_PATH 
 
 # Verification
 ```

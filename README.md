@@ -1,0 +1,1 @@
+Read mmdetection3d.md to install the original mmdetection3d
