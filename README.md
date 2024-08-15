@@ -1,1 +1,1 @@
-Read mmdetection3d.md to install the original mmdetection3d
+Read detr3d.md to run the installation of deter3d
