@@ -4,6 +4,8 @@ https://blog.csdn.net/weixin_42545475/article/details/132422665
 
 https://mmcv.readthedocs.io/en/v1.5.0/get_started/installation.html
 
+# 安装nvidia驱动
+
 # 安装 gcc 8 and g++ 8
 参考了以下网页
 https://askubuntu.com/questions/1446863/trying-to-install-gcc-8-and-g-8-on-ubuntu-22-04
@@ -162,7 +164,11 @@ remember to uncomment line 224 in create_data.py
 # 下载预训练的backbone
 
 
-# train on nuscenes data with one GPU
+# 单GPU训练
+
+1. 命令行模式
+
+2. vscode的launch.json配置模式
 ```
 python tools/train.py 
 ```
@@ -172,7 +178,7 @@ python tools/train.py
 
 ```
 
-# Train on nuscenes data with multiple gpu
+# 多卡训练
 https://blog.csdn.net/XCCCCZ/article/details/134295931
 We need to first change the nuscenes a little bit 
 /home/ubuntu/anaconda3/envs/detr3d/lib/python3.8/site-packages/nuscenes/eval/detection/data_classes.py
@@ -187,7 +193,7 @@ tools/dist_train.sh projects/configs/detr3d/detr3d_res101_gridmask.py 2
 ```
 
 
-# Test on nuscenes data
+# 在nuscenes数据集上进行测试
 
 https://blog.csdn.net/Furtherisxgi/article/details/130118952
 ```

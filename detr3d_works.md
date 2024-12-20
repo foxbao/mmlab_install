@@ -39,10 +39,18 @@ conda create -n detr3d python=3.8 -y
 conda activate detr3d
 ```
 
-# Install Pytroch 11.1
+# Install Pytroch 1.9.0 based on cuda 11.3
+
 ```
 切记，这里面的cudatoolkit=11.3，一定要和上面安装的CUDA版本一致
-conda install pytorch==1.11.0 torchvision==0.12.0 torchaudio==0.11.0 cudatoolkit=11.3 -c pytorch
+pip install torch==1.9.0+cu111 torchvision==0.10.0+cu111 torchaudio==0.9.0 -f https://download.pytorch.org/whl/torch_stable.html
+
+
+
+import torch # 如果pytorch安装成功即可导入
+print(torch.cuda.is_available()) # 查看CUDA是否可用
+print(torch.cuda.device_count()) # 查看可用的CUDA数量
+print(torch.version.cuda) # 查看CUDA的版本号
 
 ```
 
@@ -123,11 +131,16 @@ mim install mmengine==0.7.1
 ```
 
 # Install mmcv v1.6.0
+https://github.com/open-mmlab/mmcv/issues/1386
 
 ```
-pip install mmcv-full==1.6.0 -f https://download.openmmlab.com/mmcv/dist/cu113/torch1.11/index.html
+pip install mmcv-full==1.6.0 -f https://download.openmmlab.com/mmcv/dist/cu111/torch1.9.0/index.html
 ```
-
+or
+```
+pip install -U openmim
+mim install mmcv-full==1.6.0
+```
 # Install mmdetection3d v1.0.0rc6
 ```
 git checkout v1.0.0rc6
@@ -136,23 +149,78 @@ pip install -v -e .
 ```
 
 
-In case there is an error saying the mmcv version is too high, we can change the following file to remove the error
-mmdet/__init__.py
-line 16
+In case there is an error saying the mmcv version 1.6.0 is too high, we can change the following file to remove the error
+mmdetection3d/mmdet3d/__init__.py
+line 22
+mmcv_maximum_version = '1.4.0'=>mmcv_maximum_version = '1.6.0'
+
+# Verification of mmdection3d
 ```
-assert (mmcv_version >= digit_version(mmcv_minimum_version)
-        and mmcv_version <= digit_version(mmcv_maximum_version))
+conda install -c conda-forge libstdcxx-ng
+pip install open3d
+pip install -U openmim
+mim download mmdet3d --config hv_pointpillars_secfpn_6x8_160e_kitti-3d-3class --dest .
+python demo/pcd_demo.py demo/data/kitti/kitti_000008.bin hv_pointpillars_secfpn_6x8_160e_kitti-3d-3class.py hv_pointpillars_secfpn_6x8_160e_kitti-3d-3class_20200620_230421-aa0f3adb.pth --show
 ```
+If mmdetection3d works well, we will see a vehicle 3d detection result
+If we see an error of KeyError: 'SparseConv2d is already registered in conv layer'
+https://blog.csdn.net/qq_45779334/article/details/125145820
+Change mmdet3d/ops/spconv/conv.py
+Replace all 
+@CONV_LAYERS.register_module()
+to 
+@CONV_LAYERS.register_module(force=True)
 
 # process nuscene data
 https://mmdetection3d.readthedocs.io/zh-cn/latest/advanced_guides/datasets/nuscenes.html
 ```
 python tools/create_data.py nuscenes --root-path ./data/nuscenes --out-dir ./data/nuscenes --extra-tag nuscenes
 ```
+Notice: remember to uncomment line 224 in create_data.py, or the training data will not be generated
 
-remember to uncomment line 224 in create_data.py
 
-# Download pretrained backbone
+# Evaluation using pretrained backbone
+Download the backbone file detr3d_resnet101.pth
+```
+tools/dist_test.sh projects/configs/detr3d/detr3d_res101_gridmask.py detr3d_resnet101.pth 1 --eval=bbox
+```
+
+if we have multiple gpus, we can use
+```
+tools/dist_test.sh projects/configs/detr3d/detr3d_res101_gridmask.py detr3d_resnet101.pth 3 --eval=bbox
+```
+
+if we want to save the result, we can use
+
+
+if we want to visualize the result, we can use
+
+```
+tools/dist_test.sh projects/configs/detr3d/detr3d_res101_gridmask.py detr3d_resnet101.pth 3 --eval=bbox --out result.pkl
+```
+
+To use vscode for debugging
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python Debugger: Current File with Arguments",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "tools/test.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "env":{
+                "PYTHONPATH":"${workspaceFolder}"
+            },
+            "args": ["projects/configs/detr3d/detr3d_res101_gridmask.py","detr3d_resnet101.pth","--eval","box","--out","result.pkl"],
+        }
+    ]
+}
+
 
 # train on nuscenes data with one GPU
 ```
@@ -186,6 +254,9 @@ https://blog.csdn.net/Furtherisxgi/article/details/130118952
 bash ./tools/dist_test.sh configs/pointpillars/pointpillars_hv_secfpn_sbn-all_8xb4-2x_nus-3d.py checkpoints/hv_pointpillars_fpn_sbn-all_4x8_2x_nus-3d_20210826_104936-fca299c1.pth 1 --eval bbox
 
 ```
+
+
+
 
 # Test of BevFusion on nuscenes
 https://github.com/open-mmlab/mmdetection3d/tree/dev-1.x/projects/BEVFusion

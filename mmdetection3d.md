@@ -1,13 +1,25 @@
 [TOC] 
+
+https://blog.csdn.net/qq_44703886/article/details/131732662
 # Create the conda environment
 ```
 conda create --name mmdetection3d python=3.8 -y
 conda activate mmdetection3d
 ```
+# Something important to avoid bug 
+https://github.com/open-mmlab/mmdetection/issues/10962
+```
+pip install numpy==1.23.5
+pip install yapf==0.40.1
+```
 
 # Install PyTorch
 ```
+
+
 pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+
+pip install nvidia_cudnn_cu12-9.1.0.70-py3-none-manylinux2014_x86_64.whl
 ```
 # Install mmcv
 
@@ -53,11 +65,14 @@ assert (mmcv_version >= digit_version(mmcv_minimum_version)
         and mmcv_version <= digit_version(mmcv_maximum_version))
 ```
 
+# aaaa
+unset LD_LIBRARY_PATH 
+
 # Verification
 ```
 conda install -c conda-forge libstdcxx-ng
-mim download mmdet3d --config pointpillars_hv_secfpn_8xb6-160e_kitti-3d-car --dest .
-python demo/pcd_demo.py demo/data/kitti/000008.bin pointpillars_hv_secfpn_8xb6-160e_kitti-3d-car.py hv_pointpillars_secfpn_6x8_160e_kitti-3d-car_20220331_134606-d42d15ed.pth --show
+mim download mmdet3d --config hv_pointpillars_secfpn_6x8_160e_kitti-3d-3class --dest .
+python demo/pcd_demo.py demo/data/kitti/kitti_000008.bin hv_pointpillars_secfpn_6x8_160e_kitti-3d-3class.py hv_pointpillars_secfpn_6x8_160e_kitti-3d-3class_20200620_230421-aa0f3adb.pth --show
 ```
 
 # Test on nuscenes data

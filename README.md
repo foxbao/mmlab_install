@@ -1,0 +1,1 @@
+Read detr3d.md to run the installation of deter3d
