@@ -10,7 +10,7 @@ https://mmcv.readthedocs.io/en/v1.5.0/get_started/installation.html
 cd /usr/bin/
 sudo ./nvidia-installer --uninstall
 ```
-进入终端并且切换到init 模式安装，避免出现xserver的警告
+进入终端并且切换到init 模式安装
 ```
 ctr+alt+F3
 sudo init 3
@@ -57,24 +57,20 @@ conda activate detr3d
 ```
 
 # 安装 Pytroch 1.10.0
-切记，用pip的安装法 这里面的cuda版本要是11.3，一定要和上面安装的CUDA版本一致
+切记，这里面的cudatoolkit=11.3，一定要和上面安装的CUDA版本一致
 ```
-pip install torch==1.10.0+cu113 torchvision==0.11.0+cu113 torchaudio==0.10.0 -f https://download.pytorch.org/whl/cu113/torch_stable.html
+conda install pytorch==1.10.0 torchvision==0.11.0 torchaudio==0.10.0 cudatoolkit=11.3 -c pytorch -c conda-forge
 
 ```
-
 安装完之后通过
 ```
 pip list | grep torch
 
 ```
-torch                                1.10.0+cu113
-torchaudio                           0.10.0+cu113
+torch                                1.10.0
+torchaudio                           0.10.0+rocm4.1
 torchvision                          0.11.0+cu113
-
 确认安装的torch版本是1.10.0
-
-
 
 # 下载 detr3d
 ```
@@ -90,6 +86,8 @@ pip install numpy==1.23.5
 pip install yapf==0.40.1
 ```
 
+
+
 # 下载安装 mmseg 0.30.0
 方法1.通过源代码安装
 ```
@@ -99,7 +97,7 @@ git tag
 git checkout -b v0.30.0 v0.30.0
 pip install -v -e .
 ```
-方法2. 通过pip 安装（推荐）
+方法2. 通过pip 安装
 ```
 pip install mmsegmentation==0.30.0
 ```
@@ -117,11 +115,7 @@ pip install -v -e .
 ```
 pip install -U openmim
 mim install mmdet==2.28.0
-```
 
-方法3. 通过pip安装(推荐)
-```
-pip install mmdet==2.28.0
 ```
 
 # 下载安装 mmengine 0.7.1
@@ -137,11 +131,6 @@ pip install -v -e .
 ```
 pip install -U openmim
 mim install mmengine==0.7.1
-```
-
-方法3. 通过pip安装（推荐）
-```
-pip install mmengine==0.7.1
 ```
 
 # 安装 mmcv v1.6.0
@@ -186,18 +175,6 @@ line 16
 ```
 assert (mmcv_version >= digit_version(mmcv_minimum_version)
         and mmcv_version <= digit_version(mmcv_maximum_version))
-```
-
-# 降低setuptools版本
-之前如果用openmim安装库，可能会把setuptools的版本提升到60.2.0，版本过高，会在后面运行detr3d时报错，因此需要降级到59.5.0
-首先通过
-```
-pip list | grep setuptools
-```
-确定当前setuptools版本
-
-```
-pip install setuptools==59.5.0
 ```
 
 # 处理 nuscenes data
