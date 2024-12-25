@@ -5,6 +5,18 @@ https://blog.csdn.net/weixin_42545475/article/details/132422665
 https://mmcv.readthedocs.io/en/v1.5.0/get_started/installation.html
 
 # 安装nvidia驱动
+如果有旧的驱动，或者进不了桌面，先卸载旧的驱动
+```
+cd /usr/bin/
+sudo ./nvidia-installer --uninstall
+```
+进入终端并且切换到init 模式安装
+```
+ctr+alt+F3
+sudo init 3
+sudo ./NVIDIA-Linux-x86_64-550.90.07.run
+```
+
 
 # 安装 gcc 8 and g++ 8
 参考了以下网页
@@ -66,10 +78,11 @@ pip install yapf==0.40.1
 
 # 下载 mmdetection3d v1.0.0rc6
 detr3d代码中包含了mmdetection3d的子仓库，我们可以直接通过以下命令，拉取子模块的代码，注意要切换到v1.0.0rc6版本。安装mmdetection3d需要在后面一些库安装完之后再装
-We can use the submodule of mmdetection3d in detr, with
+
 ```
 git submodule init
 git submodule update
+cd mmdetection3d
 git checkout -b v1.0.0rc6 v1.0.0rc6
 ```
 或者
@@ -132,10 +145,9 @@ pip install mmcv-full==1.6.0 -f https://download.openmmlab.com/mmcv/dist/cu113/t
 ```
 
 # 安装 mmdetection3d v1.0.0rc6
-前置所有依赖库安装完毕后，安装mmdetection3d
+前置所有依赖库安装完毕后，安装mmdetection3d。请确保已经checkout到了v1.0.0rc6
 ```
 cd mmdetection3d
-git checkout v1.0.0rc6
 pip install -v -e .
 ```
 
@@ -158,38 +170,143 @@ cd data
 ln -s /path/to/nuscenes ./
 python tools/create_data.py nuscenes --root-path ./data/nuscenes --out-dir ./data/nuscenes --extra-tag nuscenes
 ```
+注意要把create_data.py中的第224行注释掉，把代码放出来，否则代码不会生成train_val部分
+```
+    elif args.dataset == 'nuscenes' and args.version != 'v1.0-mini':
+        train_version = f'{args.version}-trainval'
+        nuscenes_data_prep(
+            root_path=args.root_path,
+            info_prefix=args.extra_tag,
+            version=train_version,
+            dataset_name='NuScenesDataset',
+            out_dir=args.out_dir,
+            max_sweeps=args.max_sweeps)
+```
+运行完之后nuscenes文件夹应该是如下结构
+~/Downloads/test_detr3d/detr3d/data/nuscenes$ tree -L 1
+.
+├── maps
+├── nuscenes_dbinfos_train.pkl
+├── nuscenes_gt_database
+├── nuscenes_infos_test_mono3d.coco.json
+├── nuscenes_infos_test.pkl
+├── nuscenes_infos_train_mono3d.coco.json
+├── nuscenes_infos_train.pkl
+├── nuscenes_infos_val_mono3d.coco.json
+├── nuscenes_infos_val.pkl
+├── samples
+├── sweeps
+├── v1.0-test
+└── v1.0-trainval
 
-remember to uncomment line 224 in create_data.py
+# 处理 nuscenes mini data
+如果想用小一点的nuscenes mini数据集进行训练，可以进行如下操作
+1. 下载nuscenes mini数据集，解压到v1.0-mini文件夹中
+2. 在data文件夹下把v1.0-mini软连接过来重命名为nuscenes-mini
+```
+cd data
+ln -s ~/Downloads/v1.0-mini nuscenes-mini
+```
+3. 对mini数据集进行预处理
+```
+python tools/create_data.py nuscenes --root-path ./data/nuscenes-mini --out-dir ./data/nuscenes-mini --extra-tag nuscenes --version v1.0-mini
+
+```
 
 # 下载预训练的backbone
-
+https://drive.google.com/drive/folders/1h5bDg7Oh9hKvkFL-dRhu5-ahrEp2lRNN
+我们可以下载fcos3d.pth作为预训练模型，放置在detr3d/pretrained目录下
 
 # 单GPU训练
 
 1. 命令行模式
 
+
 2. vscode的launch.json配置模式
 ```
-python tools/train.py 
-```
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python Debugger: Current File with Arguments",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "tools/train.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "env":{
+                "PYTHONPATH":"${workspaceFolder}"
+            },
+            "args": ["projects/configs/detr3d/detr3d_res101_gridmask_cbgs.py"],
+            // "--resume-from","./work_dirs/detr3d_res101_gridmask_cbgs/latest.pth"],
+            "justMyCode": false
+
+        }
+    ]
+}
 
 ```
-"args": ["projects/configs/detr3d/detr3d_res101_gridmask.py","--cfg-options","load_from=pretrained/fcos3d.pth","--gpus","1"],
 
+注意，有肯能会出现一个CUDA相关的错误
 ```
+RuntimeError: CUDA error: CUBLAS_STATUS_INVALID_VALUE when calling `cublasSgemm( handle, opa, opb, m, n, k, &alpha, a, lda, b, ldb, &beta, c, ldc)`，
+```
+这里参照
+https://blog.csdn.net/BetrayFree/article/details/133868929的说法,可以通过
+```
+unset LD_LIBRARY_PATH
+```
+来解决
+
+实际上很可能是因为多版本cuda的问题，所以根本性的解决方式是应该卸载所有cuda，然后之安装11.3
+
 
 # 多卡训练
 https://blog.csdn.net/XCCCCZ/article/details/134295931
-We need to first change the nuscenes a little bit 
+在进行多卡训练时，首先我们要对nuscene的部分代码进行修改，否则会出现错误
+打开conda环境中的对应文件
 /home/ubuntu/anaconda3/envs/detr3d/lib/python3.8/site-packages/nuscenes/eval/detection/data_classes.py
 line 39
 ```
 # self.class_names = self.class_range.keys()
 self.class_names = list(self.class_range.keys())
 ```
+1. 命令行模式
 Then Run the training code
 ```
 tools/dist_train.sh projects/configs/detr3d/detr3d_res101_gridmask.py 2
+```
+
+2. vscode launch.json模式
+```
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python Debugger: Current File with Arguments",
+            "type": "debugpy",
+            "request": "launch",
+            // "program": "ddp_test.py",
+            "console": "integratedTerminal",
+            "module": "torch.distributed.run",
+            "args": [
+                "--nproc_per_node", "3",
+                "tools/train.py",
+                "--launcher=pytorch",
+                "projects/configs/detr3d/detr3d_res101_gridmask_cbgs.py",
+                // "--resume-from","./work_dirs/detr3d_res101_gridmask_cbgs/latest.pth"
+            ],
+            "env":{
+                "PYTHONPATH":"${workspaceFolder}"
+            },
+            "justMyCode": false
+        }
+    ]
+}
+
 ```
 
 
