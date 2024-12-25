@@ -82,12 +82,15 @@ git clone https://github.com/WangYueFt/detr3d.git
 
 ```
 
-# 安装numpy和yapf来避免一些bug
+# 安装numpy、yapf、filelock来避免一些bug
 参考以下网页，需要提前安装numpy和yapf的特定版本，否则回报错
+参考以下为网页
 https://github.com/open-mmlab/mmdetection/issues/10962
 ```
 pip install numpy==1.23.5
 pip install yapf==0.40.1
+pip install filelock
+
 ```
 
 # 下载安装 mmseg 0.30.0
@@ -156,6 +159,7 @@ pip install mmcv-full==1.6.0 -f https://download.openmmlab.com/mmcv/dist/cu113/t
 
 
 # 下载 mmdetection3d v1.0.0rc6
+方法1. detr3d中的mmdetection3d模块安装（推荐）
 detr3d代码中包含了mmdetection3d的子仓库，我们可以直接通过以下命令，拉取子模块的代码，注意要切换到v1.0.0rc6版本。安装mmdetection3d需要在后面一些库安装完之后再装
 
 ```
@@ -165,7 +169,7 @@ git submodule update
 cd mmdetection3d
 git checkout -b v1.0.0rc6 v1.0.0rc6
 ```
-或者
+方法2. 外部下载mmdetection3d
 ```
 git clone https://github.com/open-mmlab/mmdetection3d.git
 cd mmdetection3d
@@ -189,7 +193,7 @@ assert (mmcv_version >= digit_version(mmcv_minimum_version)
 ```
 
 # 降低setuptools版本
-之前如果用openmim安装库，可能会把setuptools的版本提升到60.2.0，版本过高，会在后面运行detr3d时报错，因此需要降级到59.5.0
+之前的安装可能会把setuptools的版本提升到60.2.0，甚至75.0，版本过高，会在后面运行detr3d时报错，因此需要降级到59.5.0
 首先通过
 ```
 pip list | grep setuptools
@@ -261,7 +265,11 @@ https://drive.google.com/drive/folders/1h5bDg7Oh9hKvkFL-dRhu5-ahrEp2lRNN
 # 单GPU训练
 
 1. 命令行模式
-
+命令行的训练是通过tools/dist_train.sh进行
+```
+tools/dist_train.sh projects/configs/detr3d/detr3d_res101_gridmask_cbgs.py 1
+```
+其中1代表单卡
 
 2. vscode的launch.json配置模式
 ```
@@ -312,13 +320,13 @@ line 39
 # self.class_names = self.class_range.keys()
 self.class_names = list(self.class_range.keys())
 ```
-1. 命令行模式
+方法1. 命令行模式
 Then Run the training code
 ```
 tools/dist_train.sh projects/configs/detr3d/detr3d_res101_gridmask.py 2
 ```
 
-2. vscode launch.json模式
+方法2. vscode launch.json模式
 ```
 {
     // Use IntelliSense to learn about possible attributes.
@@ -349,6 +357,83 @@ tools/dist_train.sh projects/configs/detr3d/detr3d_res101_gridmask.py 2
 }
 
 ```
+
+# 单GPU测试
+测试时需要下载对应的pth文件
+参考https://github.com/WangYueFt/detr3d中Evaluation部分，下载对应的pth文件，放置在ckpt文件夹下
+
+方法1. 命令行模式
+```
+tools/dist_test.sh projects/configs/detr3d/detr3d_res101_gridmask.py /path/to/ckpt 1 --eval=bbox
+```
+方法2. vscode launch.json模式
+```
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python Debugger: Current File with Arguments",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "tools/test.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "env":{
+                "PYTHONPATH":"${workspaceFolder}"
+            },
+            "args": [
+                "projects/configs/detr3d/detr3d_res101_gridmask_cbgs.py",
+                "ckpt/detr3d_resnet101.pth",
+                "--eval=bbox"
+                ],
+            ],
+            "justMyCode": false
+
+        }
+    ]
+}
+
+```
+
+# 多GPU测试
+
+方法1. 命令行模式
+tools/dist_test.sh projects/configs/detr3d/detr3d_res101_gridmask.py /path/to/ckpt 3 --eval=bbox
+
+方法2. vscode launch.json模式
+```
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python Debugger: Current File with Arguments",
+            "type": "debugpy",
+            "request": "launch",
+            // "program": "ddp_test.py",
+            "console": "integratedTerminal",
+            "module": "torch.distributed.run",
+            "args": [
+                "--nproc_per_node", "3",
+                "tools/test.py",
+                "--launcher=pytorch",
+                "projects/configs/detr3d/detr3d_res101_gridmask.py",
+                "ckpt/detr3d_resnet101.pth",
+                "--eval=box"
+                // "--resume-from","./work_dirs/detr3d_res101_gridmask_cbgs/latest.pth"
+            ],
+            "env":{
+                "PYTHONPATH":"${workspaceFolder}"
+            },
+            "justMyCode": false
+        }
+    ]
+}
+
+```
+
 
 
 # 在nuscenes数据集上进行测试

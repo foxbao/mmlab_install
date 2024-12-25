@@ -10,7 +10,7 @@ https://mmcv.readthedocs.io/en/v1.5.0/get_started/installation.html
 cd /usr/bin/
 sudo ./nvidia-installer --uninstall
 ```
-进入终端并且切换到init 模式安装
+进入终端并且切换到init 模式安装，避免出现xserver的警告
 ```
 ctr+alt+F3
 sudo init 3
@@ -52,25 +52,29 @@ sudo sh cuda_11.3.0_465.19.01_linux.run
 
 # 创建conda环境
 ```
-conda create -n detr3d python=3.8 -y
-conda activate detr3d
+conda create -n futr3d python=3.8 -y
+conda activate futr3d
 ```
 
 # 安装 Pytroch 1.10.0
-切记，这里面的cudatoolkit=11.3，一定要和上面安装的CUDA版本一致
+切记，用pip的安装法 这里面的cuda版本要是11.3，一定要和上面安装的CUDA版本一致
 ```
-conda install pytorch==1.10.0 torchvision==0.11.0 torchaudio==0.10.0 cudatoolkit=11.3 -c pytorch -c conda-forge
+pip install torch==1.10.0+cu113 torchvision==0.11.0+cu113 torchaudio==0.10.0 -f https://download.pytorch.org/whl/cu113/torch_stable.html
 
 ```
+
 安装完之后通过
 ```
 pip list | grep torch
 
 ```
-torch                                1.10.0
-torchaudio                           0.10.0+rocm4.1
+torch                                1.10.0+cu113
+torchaudio                           0.10.0+cu113
 torchvision                          0.11.0+cu113
+
 确认安装的torch版本是1.10.0
+
+
 
 # 下载 detr3d
 ```
@@ -84,9 +88,9 @@ https://github.com/open-mmlab/mmdetection/issues/10962
 ```
 pip install numpy==1.23.5
 pip install yapf==0.40.1
+pip install filelock
+
 ```
-
-
 
 # 下载安装 mmseg 0.30.0
 方法1.通过源代码安装
@@ -97,7 +101,7 @@ git tag
 git checkout -b v0.30.0 v0.30.0
 pip install -v -e .
 ```
-方法2. 通过pip 安装
+方法2. 通过pip 安装（推荐）
 ```
 pip install mmsegmentation==0.30.0
 ```
@@ -115,7 +119,11 @@ pip install -v -e .
 ```
 pip install -U openmim
 mim install mmdet==2.28.0
+```
 
+方法3. 通过pip安装(推荐)
+```
+pip install mmdet==2.28.0
 ```
 
 # 下载安装 mmengine 0.7.1
@@ -133,6 +141,11 @@ pip install -U openmim
 mim install mmengine==0.7.1
 ```
 
+方法3. 通过pip安装（推荐）
+```
+pip install mmengine==0.7.1
+```
+
 # 安装 mmcv v1.6.0
 安装mmcv一定要和cuda和torch版本对应，否则之后会报错，请注意链接里面cu和torch的版本，链接可以尝试打开，看是否有1.6.0的mmcv
 ```
@@ -145,6 +158,7 @@ pip install mmcv-full==1.6.0 -f https://download.openmmlab.com/mmcv/dist/cu113/t
 
 
 # 下载 mmdetection3d v1.0.0rc6
+方法1. detr3d中的mmdetection3d模块安装（推荐）
 detr3d代码中包含了mmdetection3d的子仓库，我们可以直接通过以下命令，拉取子模块的代码，注意要切换到v1.0.0rc6版本。安装mmdetection3d需要在后面一些库安装完之后再装
 
 ```
@@ -154,7 +168,7 @@ git submodule update
 cd mmdetection3d
 git checkout -b v1.0.0rc6 v1.0.0rc6
 ```
-或者
+方法2. 外部下载mmdetection3d
 ```
 git clone https://github.com/open-mmlab/mmdetection3d.git
 cd mmdetection3d
@@ -175,6 +189,18 @@ line 16
 ```
 assert (mmcv_version >= digit_version(mmcv_minimum_version)
         and mmcv_version <= digit_version(mmcv_maximum_version))
+```
+
+# 降低setuptools版本
+之前如果用openmim安装库，可能会把setuptools的版本提升到60.2.0，版本过高，会在后面运行detr3d时报错，因此需要降级到59.5.0
+首先通过
+```
+pip list | grep setuptools
+```
+确定当前setuptools版本
+
+```
+pip install setuptools==59.5.0
 ```
 
 # 处理 nuscenes data
@@ -238,7 +264,11 @@ https://drive.google.com/drive/folders/1h5bDg7Oh9hKvkFL-dRhu5-ahrEp2lRNN
 # 单GPU训练
 
 1. 命令行模式
-
+命令行的训练是通过tools/dist_train.sh进行
+```
+tools/dist_train.sh projects/configs/detr3d/detr3d_res101_gridmask_cbgs.py 1
+```
+其中1代表单卡
 
 2. vscode的launch.json配置模式
 ```
@@ -289,13 +319,13 @@ line 39
 # self.class_names = self.class_range.keys()
 self.class_names = list(self.class_range.keys())
 ```
-1. 命令行模式
+方法1. 命令行模式
 Then Run the training code
 ```
 tools/dist_train.sh projects/configs/detr3d/detr3d_res101_gridmask.py 2
 ```
 
-2. vscode launch.json模式
+方法2. vscode launch.json模式
 ```
 {
     // Use IntelliSense to learn about possible attributes.
@@ -326,6 +356,19 @@ tools/dist_train.sh projects/configs/detr3d/detr3d_res101_gridmask.py 2
 }
 
 ```
+
+# 单GPU测试
+```
+mkdir ckpt
+```
+方法1. 命令行模式
+tools/dist_test.sh projects/configs/detr3d/detr3d_res101_gridmask.py /path/to/ckpt 8 --eval=bbox
+
+
+方法2. vscode launch.json模式
+
+# 多GPU测试
+
 
 
 # 在nuscenes数据集上进行测试
