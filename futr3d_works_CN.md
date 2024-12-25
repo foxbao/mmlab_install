@@ -237,7 +237,7 @@ https://drive.google.com/drive/folders/1h5bDg7Oh9hKvkFL-dRhu5-ahrEp2lRNN
 
 # 修改futr3d代码以避免bug
 1. 命令行符号问题
-命令行的训练是通过tools/dist_train.sh进行。futr3d的dist_train.sh的文件格式有问题，他是在windows下写成的，因此需要
+命令行的训练和测试是通过tools/dist_train.sh以及tools/dist_test.sh进行。futr3d的这两个的文件格式有问题，他是在windows下写成的，因此需要
 ```
 sudo apt install dos2unix
 dos2unix tools/dist_train.sh
@@ -264,13 +264,17 @@ _base_ = [
 ```
 
 3. No module named 'plugin.fudet'
-需要把代码中所有的plugin.fudet改成plugin.futr3d，包括三处
+代码中写错了库名，需要把代码中所有的plugin.fudet改成plugin.futr3d，包括三处
 plugin/futr3d/datasets/loading.py
 plugin/futr3d/models/detectors/futr3d.py
 plugin/futr3d/models/head/futr3d_head.py
 
 4. 显存不足
-   如果训练时遇到RuntimeError: CUDA out of memory. Tried to allocate 170.00 MiB显存不足的问题，需要减少batch
+   如果训练时遇到
+   ```
+   RuntimeError: CUDA out of memory. Tried to allocate 170.00 MiB
+   ```
+   显存不足的问题，需要减少batch
    修改configs/_base_/datasets/nus-3d.py
 ```
 data = dict(
@@ -283,6 +287,7 @@ data = dict(
     samples_per_gpu=2,
     workers_per_gpu=4,
 ```
+如果还不够就变成samples_per_gpu=1
 
 
 # 单GPU训练
@@ -309,8 +314,7 @@ bash tools/dist_train.sh plugin/futr3d/configs/lidar_only/lidar_0075v_900q.py 1
             "env":{
                 "PYTHONPATH":"${workspaceFolder}"
             },
-            "args": ["projects/configs/detr3d/detr3d_res101_gridmask_cbgs.py"],
-            // "--resume-from","./work_dirs/detr3d_res101_gridmask_cbgs/latest.pth"],
+            "args": ["plugin/futr3d/configs/lidar_only/lidar_0075v_900q.py"],
             "justMyCode": false
 
         }
@@ -334,8 +338,9 @@ unset LD_LIBRARY_PATH
 
 
 # 多GPU训练
+在进行多卡训练时，可能会有一个和nuscenes相关的error
 https://blog.csdn.net/XCCCCZ/article/details/134295931
-在进行多卡训练时，首先我们要对nuscene的部分代码进行修改，否则会出现错误
+如果出现，需要进行修改
 打开conda环境中的对应文件
 /home/ubuntu/anaconda3/envs/detr3d/lib/python3.8/site-packages/nuscenes/eval/detection/data_classes.py
 line 39
@@ -343,10 +348,10 @@ line 39
 # self.class_names = self.class_range.keys()
 self.class_names = list(self.class_range.keys())
 ```
+
 方法1. 命令行模式
-Then Run the training code
 ```
-tools/dist_train.sh projects/configs/detr3d/detr3d_res101_gridmask.py 2
+bash tools/dist_train.sh plugin/futr3d/configs/lidar_only/lidar_0075v_900q.py 3
 ```
 
 方法2. vscode launch.json模式
@@ -368,8 +373,8 @@ tools/dist_train.sh projects/configs/detr3d/detr3d_res101_gridmask.py 2
                 "--nproc_per_node", "3",
                 "tools/train.py",
                 "--launcher=pytorch",
-                "projects/configs/detr3d/detr3d_res101_gridmask_cbgs.py",
-                // "--resume-from","./work_dirs/detr3d_res101_gridmask_cbgs/latest.pth"
+                "plugin/futr3d/configs/lidar_only/lidar_0075v_900q.py",
+                // "--resume-from","./work_dirs/lidar_0075v_900q/latest.pth"
             ],
             "env":{
                 "PYTHONPATH":"${workspaceFolder}"
@@ -382,11 +387,13 @@ tools/dist_train.sh projects/configs/detr3d/detr3d_res101_gridmask.py 2
 ```
 
 # 单GPU测试
-```
-mkdir ckpt
-```
+测试时需要下载对应的pth文件
+参考https://github.com/WangYueFt/detr3d中Evaluation部分，下载对应的pth文件，放置在ckpt文件夹下
+
 方法1. 命令行模式
-tools/dist_test.sh projects/configs/detr3d/detr3d_res101_gridmask.py /path/to/ckpt 1 --eval=bbox
+```
+bash tools/dist_test.sh plugin/futr3d/configs/lidar_cam/lidar_0075v_cam_res101.py ckpt/lidar_0075_cam_res101_900q.pth 1 --eval bbox
+```
 
 
 方法2. vscode launch.json模式
@@ -404,8 +411,8 @@ tools/dist_test.sh projects/configs/detr3d/detr3d_res101_gridmask.py /path/to/ck
             "program": "tools/test.py",
             "console": "integratedTerminal",
             "args": [
-                "projects/configs/detr3d/detr3d_res101_gridmask.py",
-                "ckpt/detr3d_resnet101.pth",
+                "plugin/futr3d/configs/lidar_cam/lidar_0075v_cam_res101.py",
+                "ckpt/lidar_0075_cam_res101_900q.pth",
                 "--eval=box"
                 // "--resume-from","./work_dirs/detr3d_res101_gridmask_cbgs/latest.pth"
             ],
@@ -421,7 +428,9 @@ tools/dist_test.sh projects/configs/detr3d/detr3d_res101_gridmask.py /path/to/ck
 
 # 多GPU测试
 方法1. 命令行模式 
-tools/dist_test.sh projects/configs/detr3d/detr3d_res101_gridmask.py /path/to/ckpt 2 --eval=bbox
+```
+bash tools/dist_test.sh plugin/futr3d/configs/lidar_cam/lidar_0075v_cam_res101.py ckpt/lidar_0075_cam_res101_900q.pth 3 --eval bbox
+```
 
 方法2. vscode launch.json模式
 ```
@@ -442,8 +451,8 @@ tools/dist_test.sh projects/configs/detr3d/detr3d_res101_gridmask.py /path/to/ck
                 "--nproc_per_node", "3",
                 "tools/test.py",
                 "--launcher=pytorch",
-                "projects/configs/detr3d/detr3d_res101_gridmask.py",
-                "ckpt/detr3d_resnet101.pth",
+                "plugin/futr3d/configs/lidar_cam/lidar_0075v_cam_res101.py",
+                "ckpt/lidar_0075_cam_res101_900q.pth",
                 "--eval=box"
                 // "--resume-from","./work_dirs/detr3d_res101_gridmask_cbgs/latest.pth"
             ],
@@ -454,24 +463,3 @@ tools/dist_test.sh projects/configs/detr3d/detr3d_res101_gridmask.py /path/to/ck
         }
     ]
 }
-
-```
-
-# 在nuscenes数据集上进行测试
-
-https://blog.csdn.net/Furtherisxgi/article/details/130118952
-```
-bash ./tools/dist_test.sh configs/pointpillars/pointpillars_hv_secfpn_sbn-all_8xb4-2x_nus-3d.py checkpoints/hv_pointpillars_fpn_sbn-all_4x8_2x_nus-3d_20210826_104936-fca299c1.pth 1 --eval bbox
-
-```
-
-# Test of BevFusion on nuscenes
-https://github.com/open-mmlab/mmdetection3d/tree/dev-1.x/projects/BEVFusion
-```
-python projects/BEVFusion/setup.py develop
-
-python projects/BEVFusion/demo/multi_modality_demo.py demo/data/nuscenes/n015-2018-07-24-11-22-45+0800__LIDAR_TOP__1532402927647951.pcd.bin demo/data/nuscenes/ demo/data/nuscenes/n015-2018-07-24-11-22-45+0800.pkl projects/BEVFusion/configs/bevfusion_lidar-cam_voxel0075_second_secfpn_8xb4-cyclic-20e_nus-3d.py checkpoints/bevfusion_converted.pth --cam-type all --score-thr 0.2 --show
-
-
-python projects/BEVFusion/demo/multi_modality_demo.py demo/data/nuscenes/n015-2018-07-24-11-22-45+0800__LIDAR_TOP__1532402927647951.pcd.bin demo/data/nuscenes/ demo/data/nuscenes/n015-2018-07-24-11-22-45+0800.pkl projects/BEVFusion/configs/bevfusion_lidar-cam_voxel0075_second_secfpn_8xb4-cyclic-20e_nus-3d.py checkpoints/bevfusion_lidar_voxel0075_second_secfpn_8xb4-cyclic-20e_nus-3d-2628f933.pth --cam-type all --score-thr 0.2 --show
-```

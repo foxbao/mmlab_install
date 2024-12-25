@@ -84,7 +84,6 @@ git clone https://github.com/WangYueFt/detr3d.git
 
 # 安装numpy、yapf、filelock来避免一些bug
 参考以下网页，需要提前安装numpy和yapf的特定版本，否则回报错
-参考以下为网页
 https://github.com/open-mmlab/mmdetection/issues/10962
 ```
 pip install numpy==1.23.5
@@ -398,7 +397,9 @@ tools/dist_test.sh projects/configs/detr3d/detr3d_res101_gridmask.py /path/to/ck
 # 多GPU测试
 
 方法1. 命令行模式
+```
 tools/dist_test.sh projects/configs/detr3d/detr3d_res101_gridmask.py /path/to/ckpt 3 --eval=bbox
+```
 
 方法2. vscode launch.json模式
 ```
