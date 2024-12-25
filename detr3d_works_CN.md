@@ -16,6 +16,7 @@ ctr+alt+F3
 sudo init 3
 sudo ./NVIDIA-Linux-x86_64-550.90.07.run
 ```
+切记，安装后有两个选择,32 compatibility和auto的，都选No
 
 
 # 安装 gcc 8 and g++ 8
