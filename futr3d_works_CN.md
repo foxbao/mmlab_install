@@ -76,7 +76,7 @@ torchvision                          0.11.0+cu113
 
 
 
-# 下载 detr3d
+# 下载 futr3d
 ```
 git clone https://github.com/WangYueFt/detr3d.git
 
@@ -156,40 +156,14 @@ pip install mmcv-full==1.6.0 -f https://download.openmmlab.com/mmcv/dist/cu113/t
 这种错误，基本就是mmcv和cuda版本不匹配，需要重新调整mmcv的版本
 
 
+# 编译futr3d
+futr3d本身就是直接在mmdetection3d的目录里的，因此不需要单独下载mmdtection3d，可以直接编译
+```
+cd futr3d
+pip3 install -v -e .
 
-# 下载 mmdetection3d v1.0.0rc6
-方法1. detr3d中的mmdetection3d模块安装（推荐）
-detr3d代码中包含了mmdetection3d的子仓库，我们可以直接通过以下命令，拉取子模块的代码，注意要切换到v1.0.0rc6版本。安装mmdetection3d需要在后面一些库安装完之后再装
-
-```
-cd detr3d
-git submodule init
-git submodule update
-cd mmdetection3d
-git checkout -b v1.0.0rc6 v1.0.0rc6
-```
-方法2. 外部下载mmdetection3d
-```
-git clone https://github.com/open-mmlab/mmdetection3d.git
-cd mmdetection3d
-git tag
-git checkout -b v1.0.0rc6 v1.0.0rc6
 ```
 
-# 安装 mmdetection3d v1.0.0rc6
-前置所有依赖库安装完毕后，安装mmdetection3d。请确保已经checkout到了v1.0.0rc6
-```
-cd mmdetection3d
-pip install -v -e .
-```
-
-如果报错说mmcv版本过高，我们可以修改mmdetection3d的__init__.py文件，将mmcv的版本检查去掉
-mmdet/__init__.py
-line 16
-```
-assert (mmcv_version >= digit_version(mmcv_minimum_version)
-        and mmcv_version <= digit_version(mmcv_maximum_version))
-```
 
 # 降低setuptools版本
 之前如果用openmim安装库，可能会把setuptools的版本提升到60.2.0，版本过高，会在后面运行detr3d时报错，因此需要降级到59.5.0
@@ -208,7 +182,7 @@ pip install setuptools==59.5.0
 https://mmdetection3d.readthedocs.io/zh-cn/latest/advanced_guides/datasets/nuscenes.html
 
 ```
-cd detr3d
+cd futr3d
 mkdir data
 cd data
 ln -s /path/to/nuscenes ./
@@ -261,12 +235,62 @@ python tools/create_data.py nuscenes --root-path ./data/nuscenes-mini --out-dir 
 https://drive.google.com/drive/folders/1h5bDg7Oh9hKvkFL-dRhu5-ahrEp2lRNN
 我们可以下载fcos3d.pth作为预训练模型，放置在detr3d/pretrained目录下
 
+# 修改futr3d代码以避免bug
+1. 命令行符号问题
+命令行的训练是通过tools/dist_train.sh进行。futr3d的dist_train.sh的文件格式有问题，他是在windows下写成的，因此需要
+```
+sudo apt install dos2unix
+dos2unix tools/dist_train.sh
+dos2unix tools/dist_test.sh
+```
+2. lidar_0075v_900q.py内路径问题
+plugin/futr3d/configs/lidar_only/lidar_0075v_900q.py配置文件头部的引用层级不对，需要修改
+
+```
+_base_ = [
+    '../../../configs/_base_/datasets/nus-3d.py',
+    '../../../configs/_base_/schedules/cyclic_20e.py', 
+    '../../../configs/_base_/default_runtime.py'
+]
+```
+
+变成
+```
+_base_ = [
+    '../../../../configs/_base_/datasets/nus-3d.py',
+    '../../../../configs/_base_/schedules/cyclic_20e.py', 
+    '../../../../configs/_base_/default_runtime.py'
+]
+```
+
+3. No module named 'plugin.fudet'
+需要把代码中所有的plugin.fudet改成plugin.futr3d，包括三处
+plugin/futr3d/datasets/loading.py
+plugin/futr3d/models/detectors/futr3d.py
+plugin/futr3d/models/head/futr3d_head.py
+
+4. 显存不足
+   如果训练时遇到RuntimeError: CUDA out of memory. Tried to allocate 170.00 MiB显存不足的问题，需要减少batch
+   修改configs/_base_/datasets/nus-3d.py
+```
+data = dict(
+    samples_per_gpu=4,
+    workers_per_gpu=4,
+```
+修改为
+```
+data = dict(
+    samples_per_gpu=2,
+    workers_per_gpu=4,
+```
+
+
 # 单GPU训练
 
 1. 命令行模式
-命令行的训练是通过tools/dist_train.sh进行
+
 ```
-tools/dist_train.sh projects/configs/detr3d/detr3d_res101_gridmask_cbgs.py 1
+bash tools/dist_train.sh plugin/futr3d/configs/lidar_only/lidar_0075v_900q.py 1
 ```
 其中1代表单卡
 
@@ -309,7 +333,7 @@ unset LD_LIBRARY_PATH
 实际上很可能是因为多版本cuda的问题，所以根本性的解决方式是应该卸载所有cuda，然后之安装11.3
 
 
-# 多卡训练
+# 多GPU训练
 https://blog.csdn.net/XCCCCZ/article/details/134295931
 在进行多卡训练时，首先我们要对nuscene的部分代码进行修改，否则会出现错误
 打开conda环境中的对应文件
@@ -362,14 +386,76 @@ tools/dist_train.sh projects/configs/detr3d/detr3d_res101_gridmask.py 2
 mkdir ckpt
 ```
 方法1. 命令行模式
-tools/dist_test.sh projects/configs/detr3d/detr3d_res101_gridmask.py /path/to/ckpt 8 --eval=bbox
+tools/dist_test.sh projects/configs/detr3d/detr3d_res101_gridmask.py /path/to/ckpt 1 --eval=bbox
 
 
 方法2. vscode launch.json模式
+```
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python Debugger: Current File with Arguments",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "tools/test.py",
+            "console": "integratedTerminal",
+            "args": [
+                "projects/configs/detr3d/detr3d_res101_gridmask.py",
+                "ckpt/detr3d_resnet101.pth",
+                "--eval=box"
+                // "--resume-from","./work_dirs/detr3d_res101_gridmask_cbgs/latest.pth"
+            ],
+            "env":{
+                "PYTHONPATH":"${workspaceFolder}"
+            },
+            "justMyCode": false
+        }
+    ]
+}
+```
+
 
 # 多GPU测试
+方法1. 命令行模式 
+tools/dist_test.sh projects/configs/detr3d/detr3d_res101_gridmask.py /path/to/ckpt 2 --eval=bbox
 
+方法2. vscode launch.json模式
+```
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python Debugger: Current File with Arguments",
+            "type": "debugpy",
+            "request": "launch",
+            // "program": "ddp_test.py",
+            "console": "integratedTerminal",
+            "module": "torch.distributed.run",
+            "args": [
+                "--nproc_per_node", "3",
+                "tools/test.py",
+                "--launcher=pytorch",
+                "projects/configs/detr3d/detr3d_res101_gridmask.py",
+                "ckpt/detr3d_resnet101.pth",
+                "--eval=box"
+                // "--resume-from","./work_dirs/detr3d_res101_gridmask_cbgs/latest.pth"
+            ],
+            "env":{
+                "PYTHONPATH":"${workspaceFolder}"
+            },
+            "justMyCode": false
+        }
+    ]
+}
 
+```
 
 # 在nuscenes数据集上进行测试
 
