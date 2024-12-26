@@ -336,14 +336,40 @@ bash tools/dist_test_map.sh projects/configs/maptr/maptr_tiny_r50_24e.py ckpts/r
 ```
 
 # 可视化
+我们可以从代码网站下下载训练好的网络pth，跑对应的网络，来做可视化
 
 方法1. 命令行模式
 ```
 python tools/maptr/vis_pred.py projects/configs/maptr/maptr_tiny_r50_24e.py ckpts/maptr_tiny_r50_24e.pth
+
+python tools/maptr/vis_pred.py projects/configs/maptr/maptr_tiny_r50_110e.py ckpts/maptr_tiny_r50_110e.pth
+
+python tools/maptr/vis_pred.py projects/configs/maptr/maptr_tiny_fusion_24e.py ckpts/maptr_tiny_fusion_24e.pth
 ```
 方法2. vscode launch.json模式
 ```
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python Debugger: Current File with Arguments",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "tools/maptr/vis_pred.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "env":{
+                "PYTHONPATH":"${workspaceFolder}"
+            },
+            "args": [
+                "projects/configs/maptr/maptr_tiny_r50_24e.py",
+                "ckpts/maptr_tiny_r50_24e.pth"
+                ],
+            "justMyCode": false
 
+        }
+    ]
+}
 
 
 ```
