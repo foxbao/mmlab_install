@@ -76,15 +76,14 @@ torchvision                          0.11.0+cu113
 # 下载 BEVFormer
 ```
 git clone https://github.com/fundamentalvision/BEVFormer.git
-
 ```
 
 # 安装 mmcv v1.4.0
 
 ```
 pip install mmcv-full==1.4.0 -f https://download.openmmlab.com/mmcv/dist/cu113/torch1.10.0/index.html
-
 ```
+
 # 安装 mmdet 2.14.0
 ```
 pip install mmdet==2.14.0
@@ -105,14 +104,6 @@ pip install lyft-dataset-sdk==0.0.8
 
 ```
 
-# 改变numpy、pandas、setuptools版本，安装llvmlite
-```
-pip install numpy==1.19.5 
-pip install pandas==1.4.4 
-pip install llvmlite==0.31.0 
-pip install setuptools==59.5.0
-```
-
 # 下载BEVFormer
 ```
 git clone https://github.com/fundamentalvision/BEVFormer.git
@@ -125,11 +116,20 @@ cd mmdetection3d
 git checkout v0.17.1
 pip install -v e .
 ```
-# 安装Detectron2，Timm
+# 安装一些三方库
 ```
-pip install einops fvcore seaborn iopath==0.1.9 timm==0.6.13  typing-extensions==4.5.0 pylint ipython==8.12 numba==0.48.0 scikit-image==0.19.3 yapf==0.40.1
+pip install einops fvcore seaborn iopath==0.1.9 timm==0.6.13  typing-extensions==4.5.0 pylint ipython==8.12 numba==0.48.0 scikit-image==0.19.3 yapf==0.40.1 
 ```
-安装 Detectron2，网卡会中断可以选择手动下载手动安装或者多试几次
+
+# 改变numpy、pandas、setuptools版本，安装llvmlite
+```
+pip install numpy==1.19.5 
+pip install pandas==1.4.4 
+pip install llvmlite==0.31.0 
+pip install setuptools==59.5.0
+```
+
+# 安装 Detectron2，网卡会中断可以选择手动下载手动安装或者多试几次
 ```
 python -m pip install 'git+https://github.com/facebookresearch/detectron2.git'
 
@@ -138,41 +138,27 @@ python -m pip install 'git+https://github.com/facebookresearch/detectron2.git'
 当我们用nuscenes数据进行训练时，需要先下载nuscenes数据集，然后进行预处理，生成训练用的数据集
 https://mmdetection3d.readthedocs.io/zh-cn/latest/advanced_guides/datasets/nuscenes.html
 
+注意：由于bevformer安装了Detectron2，因此会有一个叫tools的工具安装到了python环境中，会抢tools的文件夹，
+因此tools.data_converter/indoor_converter.py中
 ```
-cd detr3d
+from tools.data_converter.s3dis_data_utils import S3DISData, S3DISSegData
+from tools.data_converter.scannet_data_utils import ScanNetData, ScanNetSegData
+from tools.data_converter.sunrgbd_data_utils import SUNRGBDData
+```
+要改成
+```
+from data_converter.s3dis_data_utils import S3DISData, S3DISSegData
+from data_converter.scannet_data_utils import ScanNetData, ScanNetSegData
+from data_converter.sunrgbd_data_utils import SUNRGBDData
+```
+```
+cd MapTR
 mkdir data
 cd data
 ln -s /path/to/nuscenes ./
-python tools/create_data.py nuscenes --root-path ./data/nuscenes --out-dir ./data/nuscenes --extra-tag nuscenes
+ln -s /path/to/can_bus ./
+python tools/create_data.py nuscenes --root-path ./data/nuscenes --out-dir ./data/nuscenes --extra-tag nuscenes --version v1.0 --canbus ./data
 ```
-注意要把create_data.py中的第224行注释掉，把代码放出来，否则代码不会生成train_val部分
-```
-    elif args.dataset == 'nuscenes' and args.version != 'v1.0-mini':
-        train_version = f'{args.version}-trainval'
-        nuscenes_data_prep(
-            root_path=args.root_path,
-            info_prefix=args.extra_tag,
-            version=train_version,
-            dataset_name='NuScenesDataset',
-            out_dir=args.out_dir,
-            max_sweeps=args.max_sweeps)
-```
-运行完之后nuscenes文件夹应该是如下结构
-~/Downloads/test_detr3d/detr3d/data/nuscenes$ tree -L 1
-.
-├── maps
-├── nuscenes_dbinfos_train.pkl
-├── nuscenes_gt_database
-├── nuscenes_infos_test_mono3d.coco.json
-├── nuscenes_infos_test.pkl
-├── nuscenes_infos_train_mono3d.coco.json
-├── nuscenes_infos_train.pkl
-├── nuscenes_infos_val_mono3d.coco.json
-├── nuscenes_infos_val.pkl
-├── samples
-├── sweeps
-├── v1.0-test
-└── v1.0-trainval
 
 # 处理 nuscenes mini data
 如果想用小一点的nuscenes mini数据集进行训练，可以进行如下操作
@@ -180,26 +166,37 @@ python tools/create_data.py nuscenes --root-path ./data/nuscenes --out-dir ./dat
 2. 在data文件夹下把v1.0-mini软连接过来重命名为nuscenes-mini
 ```
 cd data
-ln -s ~/Downloads/v1.0-mini nuscenes-mini
+ln -s /path/to/nuscenes-mini nuscenes-mini
+ln -s /path/to/can_bus ./
 ```
 3. 对mini数据集进行预处理
 ```
-python tools/create_data.py nuscenes --root-path ./data/nuscenes-mini --out-dir ./data/nuscenes-mini --extra-tag nuscenes --version v1.0-mini
+python tools/create_data.py nuscenes --root-path ./data/nuscenes-mini --out-dir ./data/nuscenes-mini --extra-tag nuscenes --version v1.0-mini --canbus ./data
 
 ```
 
 # 下载预训练的backbone
-https://drive.google.com/drive/folders/1h5bDg7Oh9hKvkFL-dRhu5-ahrEp2lRNN
-我们可以下载fcos3d.pth作为预训练模型，放置在detr3d/pretrained目录下
+```
+cd bevformer
+mkdir ckpts
+
+cd ckpts & wget https://github.com/zhiqi-li/storage/releases/download/v1.0/r101_dcn_fcos3d_pretrain.pth
+```
+
+
 
 # 单GPU训练
 
 1. 命令行模式
 命令行的训练是通过tools/dist_train.sh进行
 ```
-tools/dist_train.sh projects/configs/detr3d/detr3d_res101_gridmask_cbgs.py 1
+bash ./tools/dist_train.sh ./projects/configs/bevformer/bevformer_base.py 1
 ```
 其中1代表单卡
+如果遇到显存不足得问题，可以改为bevformer_small.py
+```
+bash ./tools/dist_train.sh ./projects/configs/bevformer/bevformer_small.py 1
+```
 
 2. vscode的launch.json配置模式
 ```
@@ -216,7 +213,7 @@ tools/dist_train.sh projects/configs/detr3d/detr3d_res101_gridmask_cbgs.py 1
             "env":{
                 "PYTHONPATH":"${workspaceFolder}"
             },
-            "args": ["projects/configs/detr3d/detr3d_res101_gridmask_cbgs.py"],
+            "args": ["projects/configs/bevformer/bevformer_small.py"],
             // "--resume-from","./work_dirs/detr3d_res101_gridmask_cbgs/latest.pth"],
             "justMyCode": false
 
@@ -253,7 +250,12 @@ self.class_names = list(self.class_range.keys())
 方法1. 命令行模式
 Then Run the training code
 ```
-tools/dist_train.sh projects/configs/detr3d/detr3d_res101_gridmask.py 2
+bash ./tools/dist_train.sh ./projects/configs/bevformer/bevformer_base.py 3
+```
+
+如果遇到显存不足得问题，可以改为bevformer_small.py
+```
+bash ./tools/dist_train.sh ./projects/configs/bevformer/bevformer_small.py 3
 ```
 
 方法2. vscode launch.json模式
@@ -275,7 +277,7 @@ tools/dist_train.sh projects/configs/detr3d/detr3d_res101_gridmask.py 2
                 "--nproc_per_node", "3",
                 "tools/train.py",
                 "--launcher=pytorch",
-                "projects/configs/detr3d/detr3d_res101_gridmask_cbgs.py",
+                "projects/configs/bevformer/bevformer_small.py",
                 // "--resume-from","./work_dirs/detr3d_res101_gridmask_cbgs/latest.pth"
             ],
             "env":{

@@ -110,7 +110,7 @@ wget https://download.pytorch.org/models/resnet18-f37072fd.pth
 https://mmdetection3d.readthedocs.io/zh-cn/latest/advanced_guides/datasets/nuscenes.html
 同时maptr要求can_bus数据,并且将map extension的数据放入nuscenes的maps文件夹中
 ```
-cd detr3d
+cd MapTR
 mkdir data
 cd data
 ln -s /path/to/nuscenes ./
