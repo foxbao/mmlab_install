@@ -237,7 +237,7 @@ unset LD_LIBRARY_PATH
 实际上很可能是因为多版本cuda的问题，所以根本性的解决方式是应该卸载所有cuda，然后之安装11.3
 
 
-# 多卡训练
+# 多GPU训练
 https://blog.csdn.net/XCCCCZ/article/details/134295931
 在进行多卡训练时，首先我们要对nuscene的部分代码进行修改，否则会出现错误
 打开conda环境中的对应文件
@@ -292,13 +292,28 @@ bash ./tools/dist_train.sh ./projects/configs/bevformer/bevformer_small.py 3
 
 # 单GPU测试
 测试时需要下载对应的pth文件
-参考https://github.com/WangYueFt/detr3d中Evaluation部分，下载对应的pth文件，放置在ckpt文件夹下
+参考https://github.com/fundamentalvision/BEVFormer?tab=readme-ov-file，下载对应的pth文件，放置在ckpt文件夹下
 
 方法1. 命令行模式
 ```
-tools/dist_test.sh projects/configs/detr3d/detr3d_res101_gridmask.py /path/to/ckpt 1 --eval=bbox
+tools/dist_test.sh projects/configs/bevformer/bevformer_small.py pretrained/bevformer_small_epoch_24.pth 1
 ```
 方法2. vscode launch.json模式
+注意需要修改tools/test.py中代码
+```
+    if not distributed:
+        assert False
+        # model = MMDataParallel(model, device_ids=[0])
+        # outputs = single_gpu_test(model, data_loader, args.show, args.show_dir)
+```
+变为
+```
+    if not distributed:
+        # assert False
+        model = MMDataParallel(model, device_ids=[0])
+        outputs = single_gpu_test(model, data_loader, args.show, args.show_dir)
+```
+
 ```
 {
     "version": "0.2.0",
@@ -314,13 +329,11 @@ tools/dist_test.sh projects/configs/detr3d/detr3d_res101_gridmask.py /path/to/ck
                 "PYTHONPATH":"${workspaceFolder}"
             },
             "args": [
-                "projects/configs/detr3d/detr3d_res101_gridmask_cbgs.py",
-                "ckpt/detr3d_resnet101.pth",
-                "--eval=bbox"
+                "projects/configs/bevformer/bevformer_small.py",
+                "pretrained/bevformer_small_epoch_24.pth",
+                "--eval=box"
                 ],
-            ],
             "justMyCode": false
-
         }
     ]
 }
@@ -331,7 +344,7 @@ tools/dist_test.sh projects/configs/detr3d/detr3d_res101_gridmask.py /path/to/ck
 
 方法1. 命令行模式
 ```
-tools/dist_test.sh projects/configs/detr3d/detr3d_res101_gridmask.py /path/to/ckpt 3 --eval=bbox
+tools/dist_test.sh projects/configs/bevformer/bevformer_small.py pretrained/bevformer_small_epoch_24.pth 3
 ```
 
 方法2. vscode launch.json模式
@@ -353,10 +366,9 @@ tools/dist_test.sh projects/configs/detr3d/detr3d_res101_gridmask.py /path/to/ck
                 "--nproc_per_node", "3",
                 "tools/test.py",
                 "--launcher=pytorch",
-                "projects/configs/detr3d/detr3d_res101_gridmask.py",
-                "ckpt/detr3d_resnet101.pth",
+                "projects/configs/bevformer/bevformer_small.py",
+                "pretrained/bevformer_small_epoch_24.pth",
                 "--eval=box"
-                // "--resume-from","./work_dirs/detr3d_res101_gridmask_cbgs/latest.pth"
             ],
             "env":{
                 "PYTHONPATH":"${workspaceFolder}"
@@ -369,24 +381,22 @@ tools/dist_test.sh projects/configs/detr3d/detr3d_res101_gridmask.py /path/to/ck
 ```
 
 # 可视化
-
-
-
-# 在nuscenes数据集上进行测试
-
-https://blog.csdn.net/Furtherisxgi/article/details/130118952
+首先要通过
 ```
-bash ./tools/dist_test.sh configs/pointpillars/pointpillars_hv_secfpn_sbn-all_8xb4-2x_nus-3d.py checkpoints/hv_pointpillars_fpn_sbn-all_4x8_2x_nus-3d_20210826_104936-fca299c1.pth 1 --eval bbox
-
+tools/dist_test.sh projects/configs/bevformer/bevformer_small.py pretrained/bevformer_small_epoch_24.pth 1
 ```
-
-# Test of BevFusion on nuscenes
-https://github.com/open-mmlab/mmdetection3d/tree/dev-1.x/projects/BEVFusion
+产生检测结果，结果保存在test文件夹下，例如
 ```
-python projects/BEVFusion/setup.py develop
-
-python projects/BEVFusion/demo/multi_modality_demo.py demo/data/nuscenes/n015-2018-07-24-11-22-45+0800__LIDAR_TOP__1532402927647951.pcd.bin demo/data/nuscenes/ demo/data/nuscenes/n015-2018-07-24-11-22-45+0800.pkl projects/BEVFusion/configs/bevfusion_lidar-cam_voxel0075_second_secfpn_8xb4-cyclic-20e_nus-3d.py checkpoints/bevfusion_converted.pth --cam-type all --score-thr 0.2 --show
-
-
-python projects/BEVFusion/demo/multi_modality_demo.py demo/data/nuscenes/n015-2018-07-24-11-22-45+0800__LIDAR_TOP__1532402927647951.pcd.bin demo/data/nuscenes/ demo/data/nuscenes/n015-2018-07-24-11-22-45+0800.pkl projects/BEVFusion/configs/bevfusion_lidar-cam_voxel0075_second_secfpn_8xb4-cyclic-20e_nus-3d.py checkpoints/bevfusion_lidar_voxel0075_second_secfpn_8xb4-cyclic-20e_nus-3d-2628f933.pth --cam-type all --score-thr 0.2 --show
+test/bevformer_small/Thu_Dec_26_15_02_00_2024/pts_bbox/results_nusc.json
 ```
+注意要修改tools/analysis_tools/visual.py中的
+```
+bevformer_results = mmcv.load('test/bevformer_small/Thu_Dec_26_15_02_00_2024/pts_bbox/results_nusc.json')
+```
+load的路径改为产生的json
+
+然后运行
+```
+python tools/analysis_tools/visual.py
+```
+生成图。如果跳出来摄像头的图不动了，关闭这个图，他就会继续运行

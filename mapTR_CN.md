@@ -209,6 +209,7 @@ unset LD_LIBRARY_PATH
 实际上很可能是因为多版本cuda的问题，所以根本性的解决方式是应该卸载所有cuda，然后之安装11.3
 
 
+# 多GPU训练
 1. 命令行模式
 Then Run the training code
 ```
@@ -250,10 +251,25 @@ Then Run the training code
 # 单GPU测试
 方法1. 命令行模式
 ```
-bash tools/dist_test_map.sh projects/configs/maptr/maptr_tiny_r50_24e.py ckpts/resnet50-19c8e357.pth 1 --eval=bbox
+bash tools/dist_test_map.sh projects/configs/maptr/maptr_tiny_r50_24e.py pretrained/resnet50-19c8e357.pth 1 --eval=bbox
 ```
 
 方法2. vscode launch.json模式
+注意需要修改tools/test.py中代码
+```
+    if not distributed:
+        assert False
+        # model = MMDataParallel(model, device_ids=[0])
+        # outputs = single_gpu_test(model, data_loader, args.show, args.show_dir)
+```
+变为
+```
+    if not distributed:
+        # assert False
+        model = MMDataParallel(model, device_ids=[0])
+        outputs = single_gpu_test(model, data_loader, args.show, args.show_dir)
+```
+
 ```
 {
     "version": "0.2.0",
@@ -280,20 +296,7 @@ bash tools/dist_test_map.sh projects/configs/maptr/maptr_tiny_r50_24e.py ckpts/r
 }
 ```
 
-注意需要修改tools/test.py中代码
-```
-    if not distributed:
-        assert False
-        # model = MMDataParallel(model, device_ids=[0])
-        # outputs = single_gpu_test(model, data_loader, args.show, args.show_dir)
-```
-变为
-```
-    if not distributed:
-        # assert False
-        model = MMDataParallel(model, device_ids=[0])
-        outputs = single_gpu_test(model, data_loader, args.show, args.show_dir)
-```
+
 
 # 多GPU测试
 
@@ -340,11 +343,11 @@ bash tools/dist_test_map.sh projects/configs/maptr/maptr_tiny_r50_24e.py ckpts/r
 
 方法1. 命令行模式
 ```
-python tools/maptr/vis_pred.py projects/configs/maptr/maptr_tiny_r50_24e.py ckpts/maptr_tiny_r50_24e.pth
+python tools/maptr/vis_pred.py projects/configs/maptr/maptr_tiny_r50_24e.py pretrained/maptr_tiny_r50_24e.pth
 
-python tools/maptr/vis_pred.py projects/configs/maptr/maptr_tiny_r50_110e.py ckpts/maptr_tiny_r50_110e.pth
+python tools/maptr/vis_pred.py projects/configs/maptr/maptr_tiny_r50_110e.py pretrained/maptr_tiny_r50_110e.pth
 
-python tools/maptr/vis_pred.py projects/configs/maptr/maptr_tiny_fusion_24e.py ckpts/maptr_tiny_fusion_24e.pth
+python tools/maptr/vis_pred.py projects/configs/maptr/maptr_tiny_fusion_24e.py pretrained/maptr_tiny_fusion_24e.pth
 ```
 方法2. vscode launch.json模式
 ```
@@ -363,7 +366,7 @@ python tools/maptr/vis_pred.py projects/configs/maptr/maptr_tiny_fusion_24e.py c
             },
             "args": [
                 "projects/configs/maptr/maptr_tiny_r50_24e.py",
-                "ckpts/maptr_tiny_r50_24e.pth"
+                "pretrained/maptr_tiny_r50_24e.pth"
                 ],
             "justMyCode": false
 

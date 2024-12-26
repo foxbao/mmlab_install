@@ -7,9 +7,6 @@ conda create --name detr python=3.8 -y
 conda activate detr
 ```
 
-
-
-
 # Install PyTorch
 ```
 pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
