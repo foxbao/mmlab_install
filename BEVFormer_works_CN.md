@@ -1,8 +1,6 @@
 [TOC] 
 参考了以下网页
-https://blog.csdn.net/weixin_42545475/article/details/132422665
-
-https://mmcv.readthedocs.io/en/v1.5.0/get_started/installation.html
+https://blog.csdn.net/newbie_dqt/article/details/134766294
 
 # 安装nvidia驱动
 如果有旧的驱动，或者进不了桌面，先卸载旧的驱动
@@ -52,8 +50,8 @@ sudo sh cuda_11.3.0_465.19.01_linux.run
 
 # 创建conda环境
 ```
-conda create -n detr3d python=3.8 -y
-conda activate detr3d
+conda create -n BEVFormer python=3.8 -y
+conda activate BEVFormer
 ```
 
 # 安装 Pytroch 1.10.0
@@ -75,134 +73,67 @@ torchvision                          0.11.0+cu113
 确认安装的torch版本是1.10.0
 
 
-
-# 下载 detr3d
+# 下载 BEVFormer
 ```
-git clone https://github.com/WangYueFt/detr3d.git
+git clone https://github.com/fundamentalvision/BEVFormer.git
 
 ```
 
-# 安装numpy、yapf、filelock来避免一些bug
-参考以下网页，需要提前安装numpy和yapf的特定版本，否则回报错
-https://github.com/open-mmlab/mmdetection/issues/10962
+# 安装 mmcv v1.4.0
+
 ```
-pip install numpy==1.23.5
-pip install yapf==0.40.1
+pip install mmcv-full==1.4.0 -f https://download.openmmlab.com/mmcv/dist/cu113/torch1.10.0/index.html
+
+```
+# 安装 mmdet 2.14.0
+```
+pip install mmdet==2.14.0
+```
+# 安装 mmsegmentation 0.14.1
+```
+pip install mmsegmentation==0.14.1
+```
+
+# 安装一些代码中用到的依赖包（特别是nuscenes-devkit，官方步骤没有提到，但是代码确实用到了）
+```
 pip install filelock
+pip install ninja 
+pip install tensorboard==2.13.0 
+pip install nuscenes-devkit==1.1.10 
+pip install scikit-image==0.19.0 
+pip install lyft-dataset-sdk==0.0.8
 
 ```
 
-# 下载安装 mmseg 0.30.0
-方法1.通过源代码安装
+# 改变numpy、pandas、setuptools版本，安装llvmlite
 ```
-git clone https://github.com/open-mmlab/mmsegmentation.git
-cd mmsegmentation
-git tag
-git checkout -b v0.30.0 v0.30.0
-pip install -v -e .
-```
-方法2. 通过pip 安装（推荐）
-```
-pip install mmsegmentation==0.30.0
-```
-
-# 下载安装 mmdetection 2.28.0
-方法1.通过源代码安装
-```
-git clone https://github.com/open-mmlab/mmdetection.git
-cd mmdetection
-git tag
-git checkout -b v2.28.0 v2.28.0
-pip install -v -e .
-```
-方法2.通过mim安装
-```
-pip install -U openmim
-mim install mmdet==2.28.0
-```
-
-方法3. 通过pip安装(推荐)
-```
-pip install mmdet==2.28.0
-```
-
-# 下载安装 mmengine 0.7.1
-方法1.通过源代码安装
-```
-git clone https://github.com/open-mmlab/mmengine.git
-cd mmengine
-git tag
-git checkout -b v0.7.1 v0.7.1
-pip install -v -e .
-```
-方法2.通过mim安装
-```
-pip install -U openmim
-mim install mmengine==0.7.1
-```
-
-方法3. 通过pip安装（推荐）
-```
-pip install mmengine==0.7.1
-```
-
-# 安装 mmcv v1.6.0
-安装mmcv一定要和cuda和torch版本对应，否则之后会报错，请注意链接里面cu和torch的版本，链接可以尝试打开，看是否有1.6.0的mmcv
-```
-pip install mmcv-full==1.6.0 -f https://download.openmmlab.com/mmcv/dist/cu113/torch1.10/index.html
-```
-
-如果出现mmcv/_ext.cpython-38-x86_64-linux-gnu.so: undefined symbol: _ZN3c1015SmallVectorBaseIjE8grow_podEPvmm
-这种错误，基本就是mmcv和cuda版本不匹配，需要重新调整mmcv的版本
-
-
-
-# 下载 mmdetection3d v1.0.0rc6
-方法1. detr3d中的mmdetection3d模块安装（推荐）
-detr3d代码中包含了mmdetection3d的子仓库，我们可以直接通过以下命令，拉取子模块的代码，注意要切换到v1.0.0rc6版本。安装mmdetection3d需要在后面一些库安装完之后再装
-
-```
-cd detr3d
-git submodule init
-git submodule update
-cd mmdetection3d
-git checkout -b v1.0.0rc6 v1.0.0rc6
-```
-方法2. 外部下载mmdetection3d
-```
-git clone https://github.com/open-mmlab/mmdetection3d.git
-cd mmdetection3d
-git tag
-git checkout -b v1.0.0rc6 v1.0.0rc6
-```
-
-# 安装 mmdetection3d v1.0.0rc6
-前置所有依赖库安装完毕后，安装mmdetection3d。请确保已经checkout到了v1.0.0rc6
-```
-cd mmdetection3d
-pip install -v -e .
-```
-
-如果报错说mmcv版本过高，我们可以修改mmdetection3d的__init__.py文件，将mmcv的版本检查去掉
-mmdet/__init__.py
-line 16
-```
-assert (mmcv_version >= digit_version(mmcv_minimum_version)
-        and mmcv_version <= digit_version(mmcv_maximum_version))
-```
-
-# 降低setuptools版本
-之前的安装可能会把setuptools的版本提升到60.2.0，甚至75.0，版本过高，会在后面运行detr3d时报错，因此需要降级到59.5.0
-首先通过
-```
-pip list | grep setuptools
-```
-确定当前setuptools版本
-
-```
+pip install numpy==1.19.5 
+pip install pandas==1.4.4 
+pip install llvmlite==0.31.0 
 pip install setuptools==59.5.0
 ```
 
+# 下载BEVFormer
+```
+git clone https://github.com/fundamentalvision/BEVFormer.git
+```
+# 下载并安装mmdetection3d v0.17.1
+```
+cd BEVFormer
+git clone https://github.com/open-mmlab/mmdetection3d.git
+cd mmdetection3d
+git checkout v0.17.1
+pip install -v e .
+```
+# 安装Detectron2，Timm
+```
+pip install einops fvcore seaborn iopath==0.1.9 timm==0.6.13  typing-extensions==4.5.0 pylint ipython==8.12 numba==0.48.0 scikit-image==0.19.3 yapf==0.40.1
+```
+安装 Detectron2，网卡会中断可以选择手动下载手动安装或者多试几次
+```
+python -m pip install 'git+https://github.com/facebookresearch/detectron2.git'
+
+```
 # 处理 nuscenes data
 当我们用nuscenes数据进行训练时，需要先下载nuscenes数据集，然后进行预处理，生成训练用的数据集
 https://mmdetection3d.readthedocs.io/zh-cn/latest/advanced_guides/datasets/nuscenes.html
