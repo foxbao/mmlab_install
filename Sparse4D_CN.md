@@ -28,15 +28,7 @@ pip install torch==1.10.0+cu113 torchvision==0.11.0+cu113 torchaudio==0.10.0 -f 
 
 ```
 
-# 安装numpy和yapf等来避免一些bug
-参考以下网页，需要提前安装numpy和yapf的特定版本，否则回报错
-https://github.com/open-mmlab/mmdetection/issues/10962
-```
-pip install numba==0.53.1
-pip install numpy==1.19.5
-pip install nuscenes-devkit==1.1.9
-pip install yapf==0.40.1
-```
+
 # 安装 mmcv
 ```
 pip install mmcv==1.4.8
@@ -67,6 +59,7 @@ pip install mmsegmentation==0.20.2
 
 # 安装 mmdet3d==1.0.0rc0
 ```
+cd Sparse4D
 git clone https://github.com/open-mmlab/mmdetection3d.git
 cd mmdetection3d
 git checkout v1.0.0rc0
@@ -80,6 +73,16 @@ pip install -e . -v
 pip install motmetrics==1.1.3
 pip install tensorboard==2.6.0
 
+```
+
+# 安装numpy和yapf等来避免一些bug
+参考以下网页，需要提前安装numpy和yapf的特定版本，否则回报错
+https://github.com/open-mmlab/mmdetection/issues/10962
+```
+pip install numba==0.53.1
+pip install numpy==1.19.5
+pip install nuscenes-devkit==1.1.9
+pip install yapf==0.40.1
 ```
 
 # 降低一些库的版本
