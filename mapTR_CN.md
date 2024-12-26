@@ -62,11 +62,9 @@ pip install mmsegmentation==0.14.1
 ```
 
 # 安装 timm
-
 ```
 pip install timm
 ```
-
 
 
 # 安装mmdet3d和GKT
@@ -84,25 +82,19 @@ pip install -r requirement.txt
 
 ```
 
-# 降低setuptools版本
-之前的安装可能会把setuptools的版本提升到60.2.0，甚至75.0，版本过高，会在后面运行detr3d时报错，因此需要降级到59.5.0
+# 降低一些库的版本
+之前的安装可能会把setuptools的版本提升到60.2.0，甚至75.0，版本过高，会在后面运行detr3d时报错，因此需要降级到59.5.0。同时也会安装例如numpy和networkx等的不合适版本
 首先通过
 ```
 pip list | grep setuptools
+pip list | grep numpy
 ```
 确定当前setuptools版本
 
 ```
 pip install setuptools==59.5.0
-```
-
-# 下载预训练模型
-```
-cd /path/to/MapTR
-mkdir ckpts
-cd ckpts 
-wget https://download.pytorch.org/models/resnet50-19c8e357.pth
-wget https://download.pytorch.org/models/resnet18-f37072fd.pth
+pip install numpy==1.21.0
+pip install networkx==2.3
 ```
 
 # 处理 nuscenes data
@@ -116,6 +108,7 @@ cd data
 ln -s /path/to/nuscenes ./
 ln -s /path/to/can_bus ./
 python tools/create_data.py nuscenes --root-path ./data/nuscenes --out-dir ./data/nuscenes --extra-tag nuscenes --version v1.0 --canbus ./data
+
 
 ```
 
@@ -166,7 +159,7 @@ wget https://download.pytorch.org/models/resnet18-f37072fd.pth
 
 1. 命令行模式
 ```
-./tools/dist_train.sh ./projects/configs/maptr/maptr_tiny_r50_24e.py 1
+bash ./tools/dist_train.sh ./projects/configs/maptr/maptr_tiny_r50_24e.py 1
 
 ```
 
@@ -251,7 +244,7 @@ Then Run the training code
 # 单GPU测试
 方法1. 命令行模式
 ```
-bash tools/dist_test_map.sh projects/configs/maptr/maptr_tiny_r50_24e.py pretrained/resnet50-19c8e357.pth 1 --eval=bbox
+bash tools/dist_test_map.sh projects/configs/maptr/maptr_tiny_r50_24e.py pretrained/maptr_tiny_r50_24e.pth 1 --eval=bbox
 ```
 
 方法2. vscode launch.json模式
@@ -286,7 +279,7 @@ bash tools/dist_test_map.sh projects/configs/maptr/maptr_tiny_r50_24e.py pretrai
             },
             "args": [
                 "projects/configs/maptr/maptr_tiny_r50_24e.py",
-                "ckpts/resnet50-19c8e357.pth",
+                "pretrained/maptr_tiny_r50_24e.pth",
                 "--eval=bbox"
                 ],
             "justMyCode": false
@@ -302,7 +295,7 @@ bash tools/dist_test_map.sh projects/configs/maptr/maptr_tiny_r50_24e.py pretrai
 
 方法1. 命令行模式
 ```
-bash tools/dist_test_map.sh projects/configs/maptr/maptr_tiny_r50_24e.py ckpts/resnet50-19c8e357.pth 3 --eval=bbox
+bash tools/dist_test_map.sh projects/configs/maptr/maptr_tiny_r50_24e.py pretrained/maptr_tiny_r50_24e.pth 3 --eval=bbox
 ```
 
 方法2. vscode launch.json模式
@@ -325,7 +318,7 @@ bash tools/dist_test_map.sh projects/configs/maptr/maptr_tiny_r50_24e.py ckpts/r
                 "tools/test.py",
                 "--launcher=pytorch",
                 "projects/configs/maptr/maptr_tiny_r50_24e.py",
-                "ckpts/resnet50-19c8e357.pth",
+                "pretrained/maptr_tiny_r50_24e.pth",
                 "--eval=box"
                 // "--resume-from","./work_dirs/detr3d_res101_gridmask_cbgs/latest.pth"
             ],
