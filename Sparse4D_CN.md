@@ -142,28 +142,14 @@ bash local_train.sh sparse4dv3_temporal_r50_1x8_bs6_256x704
             "env":{
                 "PYTHONPATH":"${workspaceFolder}"
             },
-            "args": ["projects/configs/maptr/maptr_tiny_r50_24e.py",
+            "args": ["projects/configs/sparse4dv3_temporal_r50_1x8_bs6_256x704.py"],
             // "--resume-from","./work_dirs/detr3d_res101_gridmask_cbgs/latest.pth"],
             "justMyCode": false
 
         }
     ]
 }
-
 ```
-
-注意，有肯能会出现一个CUDA相关的错误
-```
-RuntimeError: CUDA error: CUBLAS_STATUS_INVALID_VALUE when calling `cublasSgemm( handle, opa, opb, m, n, k, &alpha, a, lda, b, ldb, &beta, c, ldc)`，
-```
-这里参照
-https://blog.csdn.net/BetrayFree/article/details/133868929的说法,可以通过
-```
-unset LD_LIBRARY_PATH
-```
-来解决
-
-实际上很可能是因为多版本cuda的问题，所以根本性的解决方式是应该卸载所有cuda，然后之安装11.3
 
 
 # 多GPU训练
@@ -196,7 +182,7 @@ bash local_train.sh sparse4dv3_temporal_r50_1x8_bs6_256x704
                 "--nproc_per_node", "3",
                 "tools/train.py",
                 "--launcher=pytorch",
-                "projects/configs/maptr/maptr_tiny_r50_24e.py",
+                "projects/configs/sparse4dv3_temporal_r50_1x8_bs6_256x704.py",
                 // "--resume-from","./work_dirs/detr3d_res101_gridmask_cbgs/latest.pth"
             ],
             "env":{
@@ -210,25 +196,15 @@ bash local_train.sh sparse4dv3_temporal_r50_1x8_bs6_256x704
 
 # 单GPU测试
 方法1. 命令行模式
+修改local_test.sh代码
 ```
-bash tools/dist_test_map.sh projects/configs/maptr/maptr_tiny_r50_24e.py pretrained/maptr_tiny_r50_24e.pth 1 --eval=bbox
+export CUDA_VISIBLE_DEVICES=0
+```
+```
+bash local_test.sh sparse4dv3_temporal_r50_1x8_bs6_256x704  pretrained/sparse4dv3_r50.pth
 ```
 
 方法2. vscode launch.json模式
-注意需要修改tools/test.py中代码
-```
-    if not distributed:
-        assert False
-        # model = MMDataParallel(model, device_ids=[0])
-        # outputs = single_gpu_test(model, data_loader, args.show, args.show_dir)
-```
-变为
-```
-    if not distributed:
-        # assert False
-        model = MMDataParallel(model, device_ids=[0])
-        outputs = single_gpu_test(model, data_loader, args.show, args.show_dir)
-```
 
 ```
 {
@@ -245,8 +221,8 @@ bash tools/dist_test_map.sh projects/configs/maptr/maptr_tiny_r50_24e.py pretrai
                 "PYTHONPATH":"${workspaceFolder}"
             },
             "args": [
-                "projects/configs/maptr/maptr_tiny_r50_24e.py",
-                "pretrained/maptr_tiny_r50_24e.pth",
+                "projects/configs/sparse4dv3_temporal_r50_1x8_bs6_256x704.py",
+                "pretrained/sparse4dv3_r50.pth",
                 "--eval=bbox"
                 ],
             "justMyCode": false
@@ -261,8 +237,12 @@ bash tools/dist_test_map.sh projects/configs/maptr/maptr_tiny_r50_24e.py pretrai
 # 多GPU测试
 
 方法1. 命令行模式
+修改local_test.sh代码
 ```
-bash tools/dist_test_map.sh projects/configs/maptr/maptr_tiny_r50_24e.py pretrained/maptr_tiny_r50_24e.pth 3 --eval=bbox
+export CUDA_VISIBLE_DEVICES=0,1,2
+```
+```
+bash local_test.sh sparse4dv3_temporal_r50_1x8_bs6_256x704  pretrained/sparse4dv3_r50.pth
 ```
 
 方法2. vscode launch.json模式
