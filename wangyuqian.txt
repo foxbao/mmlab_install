@@ -1,0 +1,62 @@
+mmdection3d
+
+
+conda create -n mmdetr3d python=3.9 -y
+conda activate mmdetr3d 
+
+pip install torch==1.12.1+cu113 torchvision==0.13.1+cu113 torchaudio==0.12.1 --extra-index-url https://download.pytorch.org/whl/cu113
+
+python -c 'import torch;print(torch.__version__)'
+python -c 'import torch;print(torch.cuda.is_available())'
+
+//mim是OpenMMLab项目的包管理工具，它使mmcv的安装变得容易
+pip install -U openmim
+mim install mmcv==2.0.0
+//测试
+python -c 'import mmcv;print(mmcv.__version__)'
+
+
+
+方法一：
+git clone https://github.com/open-mmlab/mmdetection.git
+cd mmdetection
+pip install -r requirements/optional.txt
+pip install -v -e .  # or "python setup.py develop"
+方法二：
+mim install mmdet==3.1.0
+测试
+python -c 'import mmdet;print(mmdet.__version__)'
+
+
+
+pip install open3d -i https://pypi.tuna.tsinghua.edu.cn/simple
+python -c 'import open3d;print(open3d.__version__)'
+
+
+
+git clone https://github.com/open-mmlab/mmdetection3d.git
+cd mmdetection3d
+pip install -r requirements/optional.txt
+pip install -v -e .  # or "python setup.py develop"
+测试
+python -c 'import mmdet3d;print(mmdet3d.__version__)'
+
+
+mmdet3d 1.2.0 requires mmdet<3.2.0,>=3.0.0
+mmdet3d 1.2.0 requires mmcv<2.1.0,>=2.0.0rc4
+
+git clone https://github.com/open-mmlab/mmdetection3d.git
+cd mmdetection3d
+git checkout -b v1.2.0 v1.2.0
+pip install -r requirements/optional.txt
+pip install -v -e .  # or "python setup.py develop"
+测试
+python -c 'import mmdet3d;print(mmdet3d.__version__)'
+
+
+
+下载
+hv_second_secfpn_6x8_80e_kitti-3d-car_20200620_230238-393f000c.pth
+
+
+python demo/pcd_demo.py demo/data/kitti/000008.bin configs/second/second_hv_secfpn_8xb6-80e_kitti-3d-car.py my_checkpoints/hv_second_secfpn_6x8_80e_kitti-3d-car_20200620_230238-393f000c.pth --show

@@ -42,6 +42,7 @@ conda activate detr3d
 # Install Pytroch 1.9.0 based on cuda 11.3
 
 ```
+切记，这里面的cudatoolkit=11.3，一定要和上面安装的CUDA版本一致
 pip install torch==1.9.0+cu111 torchvision==0.10.0+cu111 torchaudio==0.9.0 -f https://download.pytorch.org/whl/torch_stable.html
 
 
@@ -93,6 +94,13 @@ git checkout -b v0.30.0 v0.30.0
 pip install -v -e .
 ```
 
+or
+```
+pip install mmsegmentation==0.30.0
+
+
+```
+
 # Download and Install mmdetection 2.28.0
 ```
 git clone https://github.com/open-mmlab/mmdetection.git
@@ -100,6 +108,13 @@ cd mmdetection
 git tag
 git checkout -b v2.28.0 v2.28.0
 pip install -v -e .
+```
+
+or
+```
+pip install -U openmim
+mim install mmdet==2.28.0
+
 ```
 
 # Download and Install mmengine 0.7.1
@@ -110,7 +125,10 @@ git tag
 git checkout -b v0.7.1 v0.7.1
 pip install -v -e .
 ```
-
+or
+```
+mim install mmengine==0.7.1
+```
 
 # Install mmcv v1.6.0
 https://github.com/open-mmlab/mmcv/issues/1386
@@ -125,6 +143,7 @@ mim install mmcv-full==1.6.0
 ```
 # Install mmdetection3d v1.0.0rc6
 ```
+git checkout v1.0.0rc6
 cd mmdetection3d
 pip install -v -e .
 ```
@@ -205,7 +224,7 @@ To use vscode for debugging
 
 # train on nuscenes data with one GPU
 ```
-python train.py 
+python tools/train.py 
 ```
 
 ```
