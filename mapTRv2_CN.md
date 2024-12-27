@@ -144,6 +144,7 @@ ln -s ~/Downloads/v1.0-mini nuscenes-mini
 ```
 3. 对mini数据集进行预处理
 ```
+python tools/maptrv2/custom_nusc_map_converter.py --root-path ./data/nuscenes-mini --out-dir ./data/nuscenes-mini --extra-tag nuscenes --version v1.0-mini --canbus ./data
 python tools/create_data.py nuscenes --root-path ./data/nuscenes-mini --out-dir ./data/nuscenes-mini --extra-tag nuscenes --version v1.0-mini
 
 ```
@@ -180,7 +181,7 @@ bash ./tools/dist_train.sh ./projects/configs/maptrv2/maptrv2_nusc_r50_24ep.py 1
             "env":{
                 "PYTHONPATH":"${workspaceFolder}"
             },
-            "args": ["projects/configs/maptr/maptr_tiny_r50_24e.py",
+            "args": ["projects/configs/maptr/maptr_tiny_r50_24e.py"],
             // "--resume-from","./work_dirs/detr3d_res101_gridmask_cbgs/latest.pth"],
             "justMyCode": false
 
@@ -207,7 +208,7 @@ unset LD_LIBRARY_PATH
 1. 命令行模式
 Then Run the training code
 ```
-./tools/dist_train.sh ./projects/configs/maptr/maptr_tiny_r50_24e.py 3
+bash ./tools/dist_train.sh ./projects/configs/maptrv2/maptrv2_nusc_r50_24ep.py 3
 
 ```
 
@@ -230,7 +231,7 @@ Then Run the training code
                 "--nproc_per_node", "3",
                 "tools/train.py",
                 "--launcher=pytorch",
-                "projects/configs/maptr/maptr_tiny_r50_24e.py",
+                "projects/configs/maptrv2/maptrv2_nusc_r50_24ep.py",
                 // "--resume-from","./work_dirs/detr3d_res101_gridmask_cbgs/latest.pth"
             ],
             "env":{
@@ -245,11 +246,11 @@ Then Run the training code
 # 单GPU测试
 方法1. 命令行模式
 ```
-bash tools/dist_test_map.sh projects/configs/maptr/maptr_tiny_r50_24e.py pretrained/maptr_tiny_r50_24e.pth 1 --eval=bbox
+bash tools/dist_test_map.sh projects/configs/maptrv2/maptrv2_nusc_r50_24ep.py pretrained/maptrv2_nusc_r50_24e.pth 1 --eval=bbox
 ```
 
 方法2. vscode launch.json模式
-注意需要修改tools/test.py中代码
+!!!注意需要修改tools/test.py中代码
 ```
     if not distributed:
         assert False
@@ -279,8 +280,8 @@ bash tools/dist_test_map.sh projects/configs/maptr/maptr_tiny_r50_24e.py pretrai
                 "PYTHONPATH":"${workspaceFolder}"
             },
             "args": [
-                "projects/configs/maptr/maptr_tiny_r50_24e.py",
-                "pretrained/maptr_tiny_r50_24e.pth",
+                "projects/configs/maptrv2/maptrv2_nusc_r50_24ep.py",
+                "pretrained/maptrv2_nusc_r50_24e.pth",
                 "--eval=bbox"
                 ],
             "justMyCode": false
@@ -296,7 +297,8 @@ bash tools/dist_test_map.sh projects/configs/maptr/maptr_tiny_r50_24e.py pretrai
 
 方法1. 命令行模式
 ```
-bash tools/dist_test_map.sh projects/configs/maptr/maptr_tiny_r50_24e.py pretrained/maptr_tiny_r50_24e.pth 3 --eval=bbox
+
+bash tools/dist_test_map.sh projects/configs/maptrv2/maptrv2_nusc_r50_24ep.py pretrained/maptrv2_nusc_r50_24e.pth 1 --eval=bbox
 ```
 
 方法2. vscode launch.json模式
@@ -318,8 +320,8 @@ bash tools/dist_test_map.sh projects/configs/maptr/maptr_tiny_r50_24e.py pretrai
                 "--nproc_per_node", "3",
                 "tools/test.py",
                 "--launcher=pytorch",
-                "projects/configs/maptr/maptr_tiny_r50_24e.py",
-                "pretrained/maptr_tiny_r50_24e.pth",
+                "projects/configs/maptrv2/maptrv2_nusc_r50_24ep.py",
+                "pretrained/maptrv2_nusc_r50_24e.pth",
                 "--eval=box"
                 // "--resume-from","./work_dirs/detr3d_res101_gridmask_cbgs/latest.pth"
             ],

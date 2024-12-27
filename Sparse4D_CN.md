@@ -27,77 +27,34 @@ git clone https://github.com/HorizonRobotics/Sparse4D.git
 pip install torch==1.10.0+cu113 torchvision==0.11.0+cu113 torchaudio==0.10.0 -f https://download.pytorch.org/whl/torch_stable.html
 
 ```
-
+# 安装numpy
+```
+pip install numpy==1.23.5
+```
 
 # 安装 mmcv
 ```
-pip install mmcv==1.4.8
+pip install mmcv==1.7.1 -f https://download.openmmlab.com/mmcv/dist/cu113/torch1.10/index.html
 ```
 
-
-# 安装 mmcv v1.4.0
-
-```
-pip install mmcv-full==1.4.0 -f https://download.openmmlab.com/mmcv/dist/cu113/torch1.10.0/index.html
-
-```
-
-# 安装 mmdetection 2.19.1
+# 安装 mmdet==2.28.2
 
 
 方法1. 通过pip安装(选择这种)
 ```
-pip install mmdet==2.19.1
+pip install mmdet==2.28.2
 ```
 
-# 安装 mmsegmentation==0.20.2
-
-方法2. 通过pip 安装
+# 安装第三方库
 ```
-pip install mmsegmentation==0.20.2
-```
-
-# 安装 mmdet3d==1.0.0rc0
-```
-cd Sparse4D
-git clone https://github.com/open-mmlab/mmdetection3d.git
-cd mmdetection3d
-git checkout v1.0.0rc0
-pip install -e . -v
-```
-
-
-# 安装其他功能包
-
-```
+pip install filelock
+pip install urllib3==1.26.16
+pip install pyquaternion==0.9.9
+pip install nuscenes-devkit==1.1.10
+pip install yapf==0.33.0
+pip install tensorboard==2.14.0
 pip install motmetrics==1.1.3
-pip install tensorboard==2.6.0
-
-```
-
-# 安装numpy和yapf等来避免一些bug
-参考以下网页，需要提前安装numpy和yapf的特定版本，否则回报错
-https://github.com/open-mmlab/mmdetection/issues/10962
-```
-pip install numba==0.53.1
-pip install numpy==1.19.5
-pip install nuscenes-devkit==1.1.9
-pip install yapf==0.40.1
-```
-
-# 降低一些库的版本
-之前的安装可能会把setuptools的版本提升到60.2.0，甚至75.0，版本过高，会在后面运行detr3d时报错，因此需要降级到59.5.0。同时也会安装例如numpy和networkx等的不合适版本
-首先通过
-```
-pip list | grep setuptools
-pip list | grep numpy
-```
-确定当前setuptools版本
-
-```
-pip install setuptools==59.5.0
-pip install numpy==1.19.5
-pip install networkx==2.3
+pip install pandas==1.1.5
 ```
 
 # 安装算子
@@ -112,14 +69,11 @@ python setup.py develop
 https://mmdetection3d.readthedocs.io/zh-cn/latest/advanced_guides/datasets/nuscenes.html
 同时maptr要求can_bus数据,并且将map extension的数据放入nuscenes的maps文件夹中
 ```
-cd MapTR
+cd Sparse4D
 mkdir data
 cd data
 ln -s /path/to/nuscenes ./
-ln -s /path/to/can_bus ./
 python tools/create_data.py nuscenes --root-path ./data/nuscenes --out-dir ./data/nuscenes --extra-tag nuscenes --version v1.0 --canbus ./data
-
-
 ```
 
 运行完之后nuscenes文件夹应该是如下结构

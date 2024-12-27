@@ -136,9 +136,45 @@ MapTR
 如果想用小一点的nuscenes mini数据集进行训练，可以进行如下操作
 1. 下载nuscenes mini数据集，解压到v1.0-mini文件夹中
 2. 在data文件夹下把v1.0-mini软连接过来重命名为nuscenes-mini
+3. copy map expansion to the folder of nuscenes-mini/map
 ```
 cd data
 ln -s ~/Downloads/v1.0-mini nuscenes-mini
+```
+
+modified the code of custom_nusc_map_converter.py
+```
+if __name__ == '__main__':
+    if args.version != 'v1.0-mini':
+        train_version = f'{args.version}-trainval'
+        nuscenes_data_prep(
+            root_path=args.root_path,
+            can_bus_root_path=args.canbus,
+            info_prefix=args.extra_tag,
+            version=train_version,
+            dataset_name='NuScenesDataset',
+            out_dir=args.out_dir,
+            max_sweeps=args.max_sweeps)
+        test_version = f'{args.version}-test'
+        nuscenes_data_prep(
+            root_path=args.root_path,
+            can_bus_root_path=args.canbus,
+            info_prefix=args.extra_tag,
+            version=test_version,
+            dataset_name='NuScenesDataset',
+            out_dir=args.out_dir,
+            max_sweeps=args.max_sweeps)
+    elif args.version == 'v1.0-mini':
+        train_version = f'{args.version}'
+        nuscenes_data_prep(
+            root_path=args.root_path,
+            can_bus_root_path=args.canbus,
+            info_prefix=args.extra_tag,
+            version=train_version,
+            dataset_name='NuScenesDataset',
+            out_dir=args.out_dir,
+            max_sweeps=args.max_sweeps)
+
 ```
 3. 对mini数据集进行预处理
 ```
