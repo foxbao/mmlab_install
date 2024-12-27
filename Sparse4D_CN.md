@@ -27,14 +27,10 @@ git clone https://github.com/HorizonRobotics/Sparse4D.git
 pip install torch==1.10.0+cu113 torchvision==0.11.0+cu113 torchaudio==0.10.0 -f https://download.pytorch.org/whl/torch_stable.html
 
 ```
-# 安装numpy
-```
-pip install numpy==1.23.5
-```
 
 # 安装 mmcv
 ```
-pip install mmcv==1.7.1 -f https://download.openmmlab.com/mmcv/dist/cu113/torch1.10/index.html
+pip install mmcv-full==1.7.1 -f https://download.openmmlab.com/mmcv/dist/cu113/torch1.10/index.html
 ```
 
 # 安装 mmdet==2.28.2
@@ -55,6 +51,7 @@ pip install yapf==0.33.0
 pip install tensorboard==2.14.0
 pip install motmetrics==1.1.3
 pip install pandas==1.1.5
+pip install numpy==1.23.5
 ```
 
 # 安装算子
@@ -71,8 +68,9 @@ https://mmdetection3d.readthedocs.io/zh-cn/latest/advanced_guides/datasets/nusce
 ```
 cd Sparse4D
 mkdir data
-cd data
-ln -s /path/to/nuscenes ./
+ln -s ~/Downloads/nuscenes ./data/nuscenes
+pkl_path="data/nuscenes_anno_pkls"
+mkdir -p ${pkl_path}
 python tools/create_data.py nuscenes --root-path ./data/nuscenes --out-dir ./data/nuscenes --extra-tag nuscenes --version v1.0 --canbus ./data
 ```
 
@@ -106,25 +104,27 @@ ln -s ~/Downloads/v1.0-mini nuscenes-mini
 ```
 3. 对mini数据集进行预处理
 ```
-python tools/create_data.py nuscenes --root-path ./data/nuscenes-mini --out-dir ./data/nuscenes-mini --extra-tag nuscenes --version v1.0-mini
-
+pkl_path="data/nuscenes_anno_pkls"
+mkdir -p ${pkl_path}
+python3 tools/nuscenes_converter.py  --root_path ./data/nuscenes-mini --version v1.0-mini --info_prefix ${pkl_path}/nuscenes-mini
+```
+# 通过K-means生成anchors
+```
+export PYTHONPATH=$PYTHONPATH:$(pwd)
+python3 tools/anchor_generator.py --ann_file ${pkl_path}/nuscenes_infos_train.pkl
 ```
 
 # 准备预训练模型
 ```
-cd /path/to/MapTR
-mkdir ckpts
-cd ckpts 
-wget https://download.pytorch.org/models/resnet50-19c8e357.pth
-wget https://download.pytorch.org/models/resnet18-f37072fd.pth
+mkdir ckpt
+wget https://download.pytorch.org/models/resnet50-19c8e357.pth -O ckpt/resnet50-19c8e357.pth
 ```
 
 # 单GPU训练
 
 1. 命令行模式
 ```
-bash ./tools/dist_train.sh ./projects/configs/maptr/maptr_tiny_r50_24e.py 1
-
+bash local_train.sh sparse4dv3_temporal_r50_1x8_bs6_256x704
 ```
 
 2. vscode的launch.json配置模式
@@ -168,13 +168,16 @@ unset LD_LIBRARY_PATH
 
 # 多GPU训练
 1. 命令行模式
-Then Run the training code
+修改local_train.sh，启动三个三卡0,1,2
 ```
-./tools/dist_train.sh ./projects/configs/maptr/maptr_tiny_r50_24e.py 3
+export CUDA_VISIBLE_DEVICES=0,1,2
+```
 
 ```
+bash local_train.sh sparse4dv3_temporal_r50_1x8_bs6_256x704
+```
 
-2. vscode launch.json模式
+1. vscode launch.json模式
 ```
 {
     // Use IntelliSense to learn about possible attributes.

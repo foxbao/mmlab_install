@@ -24,7 +24,7 @@ pip install torch==1.10.0+cu113 torchvision==0.11.0+cu113 torchaudio==0.10.0 -f 
 
 ```
 
-# 下载 maptr
+# 下载 MapTRv2
 ```
 git clone https://github.com/hustvl/MapTR.git MapTRv2
 cd MapTRv2
@@ -149,7 +149,7 @@ python tools/create_data.py nuscenes --root-path ./data/nuscenes-mini --out-dir 
 
 ```
 
-# 准备预训练模型
+# 准备预训练模型backbone
 ```
 cd /path/to/MapTR
 mkdir ckpts
@@ -204,6 +204,8 @@ unset LD_LIBRARY_PATH
 
 实际上很可能是因为多版本cuda的问题，所以根本性的解决方式是应该卸载所有cuda，然后之安装11.3
 
+
+# 多GPU训练
 
 1. 命令行模式
 Then Run the training code
@@ -335,15 +337,12 @@ bash tools/dist_test_map.sh projects/configs/maptrv2/maptrv2_nusc_r50_24ep.py pr
 ```
 
 # 可视化
-我们可以从代码网站下下载训练好的网络pth，跑对应的网络，来做可视化
+我们可以从代码网站下下载训练好的网络pth放入pretrained，或者自己训练好的pth，跑对应的网络，来做可视化
 
 方法1. 命令行模式
 ```
-python tools/maptr/vis_pred.py projects/configs/maptr/maptr_tiny_r50_24e.py ckpts/maptr_tiny_r50_24e.pth
+python tools/maptrv2/nusc_vis_pred.py projects/configs/maptrv2/maptrv2_nusc_r50_24ep.py pretrained/maptrv2_nusc_r50_24e.pth
 
-python tools/maptr/vis_pred.py projects/configs/maptr/maptr_tiny_r50_110e.py ckpts/maptr_tiny_r50_110e.pth
-
-python tools/maptr/vis_pred.py projects/configs/maptr/maptr_tiny_fusion_24e.py ckpts/maptr_tiny_fusion_24e.pth
 ```
 方法2. vscode launch.json模式
 ```
@@ -354,15 +353,15 @@ python tools/maptr/vis_pred.py projects/configs/maptr/maptr_tiny_fusion_24e.py c
             "name": "Python Debugger: Current File with Arguments",
             "type": "debugpy",
             "request": "launch",
-            "program": "tools/maptr/vis_pred.py",
+            "program": "tools/maptrv2/nusc_vis_pred.py",
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}",
             "env":{
                 "PYTHONPATH":"${workspaceFolder}"
             },
             "args": [
-                "projects/configs/maptr/maptr_tiny_r50_24e.py",
-                "ckpts/maptr_tiny_r50_24e.pth"
+                "projects/configs/maptrv2/maptrv2_nusc_r50_24ep.py",
+                "pretrained/maptrv2_nusc_r50_24e.pth"
                 ],
             "justMyCode": false
 

@@ -7,7 +7,7 @@
 3. 参考 mapTR_CN.md 配置 mapTR
 4. 参考 mapTRv2_CN.md 配置 mapTR
 5. 参考 BEVFormer_CN.md 配置 BEVFormer
-
+6. 参考 Sparse4D_CN.md 配置 Sparse4D
 
 # 原理文件
 参考mmdetection代码解析.docx，有各个网络的原理介绍
