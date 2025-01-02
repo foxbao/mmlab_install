@@ -13,7 +13,7 @@ pip3 install torch torchvision torchaudio --index-url https://download.pytorch.o
 
 
 ```
-# Download detr3d
+# Download detr
 ```
 git clone https://github.com/facebookresearch/detr.git
 ```

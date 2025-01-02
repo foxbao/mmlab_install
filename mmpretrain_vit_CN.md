@@ -125,7 +125,7 @@ bash local_train.sh sparse4dv3_temporal_r50_1x8_bs6_256x704
             "env":{
                 "PYTHONPATH":"${workspaceFolder}"
             },
-            "args": ["projects/configs/sparse4dv3_temporal_r50_1x8_bs6_256x704.py"],
+            "args": ["configs/vision_transformer/vit-base-p16_ft-64xb64_in1k-384.py"],
             "justMyCode": false
 
         }
