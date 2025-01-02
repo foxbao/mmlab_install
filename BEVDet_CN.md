@@ -168,7 +168,7 @@ wget https://download.pytorch.org/models/resnet50-0676ba61.pth
 
 1. 命令行模式
 ```
-python tools/train.py ./configs/bevdet/bevdet-r50.py
+c
 ```
 
 2. vscode的launch.json配置模式
