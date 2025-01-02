@@ -125,6 +125,7 @@ pip install tensorboard
 pip install trimesh==2.35.39 
 pip install setuptools==58.2.0 
 pip install yapf==0.40.1
+pip install spconv-cu113
 ```
 
 
@@ -168,7 +169,7 @@ wget https://download.pytorch.org/models/resnet50-0676ba61.pth
 
 1. 命令行模式
 ```
-c
+python tools/train.py ./configs/bevdet/bevdet-r50.py
 ```
 
 2. vscode的launch.json配置模式
@@ -196,19 +197,10 @@ c
 ```
 
 # 多卡训练
-https://blog.csdn.net/XCCCCZ/article/details/134295931
-在进行多卡训练时，首先我们要对nuscene的部分代码进行修改，否则会出现错误
-打开conda环境中的对应文件
-/home/ubuntu/anaconda3/envs/detr3d/lib/python3.8/site-packages/nuscenes/eval/detection/data_classes.py
-line 39
-```
-# self.class_names = self.class_range.keys()
-self.class_names = list(self.class_range.keys())
-```
 方法1. 命令行模式
 Then Run the training code
 ```
-tools/dist_train.sh ./configs/bevdet/bevdet-r50.py 2
+bash tools/dist_train.sh ./configs/bevdet/bevdet-r50.py 3
 ```
 
 方法2. vscode launch.json模式
@@ -230,7 +222,7 @@ tools/dist_train.sh ./configs/bevdet/bevdet-r50.py 2
                 "--nproc_per_node", "3",
                 "tools/train.py",
                 "--launcher=pytorch",
-                "projects/configs/detr3d/detr3d_res101_gridmask_cbgs.py",
+                "./configs/bevdet/bevdet-r50.py",
                 // "--resume-from","./work_dirs/detr3d_res101_gridmask_cbgs/latest.pth"
             ],
             "env":{
@@ -321,25 +313,11 @@ tools/dist_test.sh projects/configs/detr3d/detr3d_res101_gridmask.py /path/to/ck
 
 ```
 
+# tensorboard
+```
+pip install protobuf==3.14.0
+tensorboard --logdir work_dirs/bevdet-r50/tf_logs/
+```
+
 # 可视化
 
-
-
-# 在nuscenes数据集上进行测试
-
-https://blog.csdn.net/Furtherisxgi/article/details/130118952
-```
-bash ./tools/dist_test.sh configs/pointpillars/pointpillars_hv_secfpn_sbn-all_8xb4-2x_nus-3d.py checkpoints/hv_pointpillars_fpn_sbn-all_4x8_2x_nus-3d_20210826_104936-fca299c1.pth 1 --eval bbox
-
-```
-
-# Test of BevFusion on nuscenes
-https://github.com/open-mmlab/mmdetection3d/tree/dev-1.x/projects/BEVFusion
-```
-python projects/BEVFusion/setup.py develop
-
-python projects/BEVFusion/demo/multi_modality_demo.py demo/data/nuscenes/n015-2018-07-24-11-22-45+0800__LIDAR_TOP__1532402927647951.pcd.bin demo/data/nuscenes/ demo/data/nuscenes/n015-2018-07-24-11-22-45+0800.pkl projects/BEVFusion/configs/bevfusion_lidar-cam_voxel0075_second_secfpn_8xb4-cyclic-20e_nus-3d.py checkpoints/bevfusion_converted.pth --cam-type all --score-thr 0.2 --show
-
-
-python projects/BEVFusion/demo/multi_modality_demo.py demo/data/nuscenes/n015-2018-07-24-11-22-45+0800__LIDAR_TOP__1532402927647951.pcd.bin demo/data/nuscenes/ demo/data/nuscenes/n015-2018-07-24-11-22-45+0800.pkl projects/BEVFusion/configs/bevfusion_lidar-cam_voxel0075_second_secfpn_8xb4-cyclic-20e_nus-3d.py checkpoints/bevfusion_lidar_voxel0075_second_secfpn_8xb4-cyclic-20e_nus-3d-2628f933.pth --cam-type all --score-thr 0.2 --show
-```
