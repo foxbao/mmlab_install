@@ -318,4 +318,21 @@ tensorboard --logdir work_dirs/bevdet-r50/tf_logs/
 ```
 
 # 可视化
+1. 生成json文件
+```
+# 运行test.py 必须--out", "--eval", "--format-only", "--show" or "--show-dir至少跟一个
+# json文件生成需要增加 --eval-options参数 jsonfile_prefix=test_dirs
+# 实在搞不清楚请看test.py的源码，看如何加载参数即可
 
+# 1 直接测试
+python tools/test.py ./configs/bevdet/bevdet-r50.py work_dirs/bevdet-r50/latest.pth --format-only
+
+# 2 测试保存json文件
+python tools/test.py ./configs/bevdet/bevdet-r50.py work_dirs/bevdet-r50/latest.pth --format-only --eval-options jsonfile_prefix=test_dirs
+# 保留json位于目录test_dirs下
+
+# 3 直接生成保存为pkl格式
+python tools/test.py ./configs/bevdet/bevdet-r50.py ckpts/bevdet-r50.pth --out=./test_dirs/out.pkl
+```
+运行上面第一条指令生成./work_dir/results_nusc.json文件
+2. json文件转可视化
