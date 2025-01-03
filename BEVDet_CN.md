@@ -241,7 +241,7 @@ bash tools/dist_train.sh ./configs/bevdet/bevdet-r50.py 3
 
 方法1. 命令行模式
 ```
-tools/dist_test.sh projects/configs/detr3d/detr3d_res101_gridmask.py /path/to/ckpt 1 --eval=bbox
+python tools/test.py ./configs/bevdet/bevdet-r50.py work_dirs/bevdet-r50/latest.pth --eval mAP
 ```
 方法2. vscode launch.json模式
 ```
@@ -259,13 +259,11 @@ tools/dist_test.sh projects/configs/detr3d/detr3d_res101_gridmask.py /path/to/ck
                 "PYTHONPATH":"${workspaceFolder}"
             },
             "args": [
-                "projects/configs/detr3d/detr3d_res101_gridmask_cbgs.py",
-                "ckpt/detr3d_resnet101.pth",
-                "--eval=bbox"
+                "configs/bevdet/bevdet-r50.py",
+                "work_dirs/bevdet-r50/latest.pth",
+                "--eval=mAP"
                 ],
-            ],
             "justMyCode": false
-
         }
     ]
 }
@@ -276,7 +274,7 @@ tools/dist_test.sh projects/configs/detr3d/detr3d_res101_gridmask.py /path/to/ck
 
 方法1. 命令行模式
 ```
-tools/dist_test.sh projects/configs/detr3d/detr3d_res101_gridmask.py /path/to/ckpt 3 --eval=bbox
+bash ./tools/dist_test.sh ./configs/bevdet/bevdet-r50.py work_dirs/bevdet-r50/latest.pth 3 --eval mAP
 ```
 
 方法2. vscode launch.json模式
@@ -298,9 +296,9 @@ tools/dist_test.sh projects/configs/detr3d/detr3d_res101_gridmask.py /path/to/ck
                 "--nproc_per_node", "3",
                 "tools/test.py",
                 "--launcher=pytorch",
-                "projects/configs/detr3d/detr3d_res101_gridmask.py",
-                "ckpt/detr3d_resnet101.pth",
-                "--eval=box"
+                "configs/bevdet/bevdet-r50.py",
+                "work_dirs/bevdet-r50/latest.pth",
+                "--eval=mAP"
                 // "--resume-from","./work_dirs/detr3d_res101_gridmask_cbgs/latest.pth"
             ],
             "env":{
