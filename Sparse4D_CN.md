@@ -264,8 +264,8 @@ bash local_test.sh sparse4dv3_temporal_r50_1x8_bs6_256x704  pretrained/sparse4dv
                 "--nproc_per_node", "3",
                 "tools/test.py",
                 "--launcher=pytorch",
-                "projects/configs/maptr/maptr_tiny_r50_24e.py",
-                "pretrained/maptr_tiny_r50_24e.pth",
+                "projects/configs/sparse4dv3_temporal_r50_1x8_bs6_256x704.py",
+                "pretrained/sparse4dv3_r50.pth",
                 "--eval=box"
                 // "--resume-from","./work_dirs/detr3d_res101_gridmask_cbgs/latest.pth"
             ],
@@ -279,42 +279,13 @@ bash local_test.sh sparse4dv3_temporal_r50_1x8_bs6_256x704  pretrained/sparse4dv
 ```
 
 # 可视化
-我们可以从代码网站下下载训练好的网络pth，跑对应的网络，来做可视化
-
-方法1. 命令行模式
-```
-python tools/maptr/vis_pred.py projects/configs/maptr/maptr_tiny_r50_24e.py pretrained/maptr_tiny_r50_24e.pth
-
-python tools/maptr/vis_pred.py projects/configs/maptr/maptr_tiny_r50_110e.py pretrained/maptr_tiny_r50_110e.pth
-
-python tools/maptr/vis_pred.py projects/configs/maptr/maptr_tiny_fusion_24e.py pretrained/maptr_tiny_fusion_24e.pth
-```
-方法2. vscode launch.json模式
-```
-{
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "Python Debugger: Current File with Arguments",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "tools/maptr/vis_pred.py",
-            "console": "integratedTerminal",
-            "cwd": "${workspaceFolder}",
-            "env":{
-                "PYTHONPATH":"${workspaceFolder}"
-            },
-            "args": [
-                "projects/configs/maptr/maptr_tiny_r50_24e.py",
-                "pretrained/maptr_tiny_r50_24e.pth"
-                ],
-            "justMyCode": false
-
-        }
-    ]
-}
-
+参考
+https://github.com/HorizonRobotics/Sparse4D/blob/main/tutorial/tutorial.ipynb
 
 ```
+pip install jupyter
+```
+
+运行tutorial.ipynb
 
 
