@@ -334,5 +334,9 @@ python tools/test.py ./configs/bevdet/bevdet-r50.py work_dirs/bevdet-r50/latest.
 # 3 直接生成保存为pkl格式
 python tools/test.py ./configs/bevdet/bevdet-r50.py ckpts/bevdet-r50.pth --out=./test_dirs/out.pkl
 ```
-运行上面第一条指令生成./work_dir/results_nusc.json文件
+运行上面第2条指令生成./work_dir/results_nusc.json文件
 2. json文件转可视化
+```
+python tools/analysis_tools/vis.py ./test_dirs/pts_bbox/results_nusc.json
+
+```
