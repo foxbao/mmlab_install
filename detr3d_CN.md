@@ -265,6 +265,18 @@ https://drive.google.com/drive/folders/1h5bDg7Oh9hKvkFL-dRhu5-ahrEp2lRNN
 
 1. 命令行模式
 命令行的训练是通过tools/dist_train.sh进行
+
+https://blog.csdn.net/XCCCCZ/article/details/134295931
+在进行多卡训练时，首先我们要对nuscene的部分代码进行修改，否则会出现错误
+打开conda环境中的对应文件
+/home/ubuntu/anaconda3/envs/detr3d/lib/python3.8/site-packages/nuscenes/eval/detection/data_classes.py
+line 39
+```
+# self.class_names = self.class_range.keys()
+self.class_names = list(self.class_range.keys())
+```
+
+
 ```
 tools/dist_train.sh projects/configs/detr3d/detr3d_res101_gridmask_cbgs.py 1
 ```

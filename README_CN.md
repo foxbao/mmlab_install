@@ -8,7 +8,7 @@
 4. 参考 mapTRv2_CN.md 配置 MapTR
 5. 参考 BEVFormer_CN.md 配置 BEVFormer
 6. 参考 Sparse4D_CN.md 配置 Sparse4D
-7. 参考 mmpretrain_vit_CN.md 配置Vit
+7. 参考 Vit_CN.md 配置Vit
 8. 参考 detr_CN.md 配置detr
 9. 参考 BEVDet_CN.md 配置BEVDet
 
