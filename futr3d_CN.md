@@ -463,3 +463,6 @@ bash tools/dist_test.sh plugin/futr3d/configs/lidar_cam/lidar_0075v_cam_res101.p
         }
     ]
 }
+
+```
+# 单帧数据推理

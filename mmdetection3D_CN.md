@@ -101,19 +101,21 @@ pip install -v -e .
 ```
 
 # 验证安装
-1. 下载配置文件和模型权重文件
+下载配置文件和模型权重文件
 ```
 pip install -U openmim
 mim download mmdet3d --config pointpillars_hv_secfpn_8xb6-160e_kitti-3d-car --dest .
 ```
-
-2. 推理验证
-方法一：命令行推理
+验证pointpillar模型
 ```
 python demo/pcd_demo.py demo/data/kitti/000008.bin pointpillars_hv_secfpn_8xb6-160e_kitti-3d-car.py hv_pointpillars_secfpn_6x8_160e_kitti-3d-car_20220331_134606-d42d15ed.pth --show
 ```
 
-方法二：api推理
+
+#  推理验证
+推理部分是采用api，来进行单帧数据的推理
+
+1. 单模态激光
 ```
 from mmdet3d.apis import init_model, inference_detector
 
@@ -121,5 +123,37 @@ config_file = 'pointpillars_hv_secfpn_8xb6-160e_kitti-3d-car.py'
 checkpoint_file = 'hv_pointpillars_secfpn_6x8_160e_kitti-3d-car_20220331_134606-d42d15ed.pth'
 model = init_model(config_file, checkpoint_file)
 inference_detector(model, 'demo/data/kitti/000008.bin')
+```
+
+2. 多模态样例
+在 NuScenes 数据上测试 BEVFusion 模型
+```
+python projects/BEVFusion/setup.py develop
+export PYTHONPATH=$PYTHONPATH:$(pwd)
+
+python projects/BEVFusion/demo/multi_modality_demo.py demo/data/nuscenes/n015-2018-07-24-11-22-45+0800__LIDAR_TOP__1532402927647951.pcd.bin demo/data/nuscenes/ demo/data/nuscenes/n015-2018-07-24-11-22-45+0800.pkl projects/BEVFusion/configs/bevfusion_lidar-cam_voxel0075_second_secfpn_8xb4-cyclic-20e_nus-3d.py bevfusion_converted.pth --cam-type all --score-thr 0.2 --show
+```
+
+vscode launch.json
+```
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python Debugger: Current File with Arguments",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "projects/BEVFusion/demo/multi_modality_demo.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "env":{
+                "PYTHONPATH":"${workspaceFolder}"
+            },
+            "args": ["demo/data/nuscenes/n015-2018-07-24-11-22-45+0800__LIDAR_TOP__1532402927647951.pcd.bin","demo/data/nuscenes/","demo/data/nuscenes/n015-2018-07-24-11-22-45+0800.pkl","projects/BEVFusion/configs/bevfusion_lidar-cam_voxel0075_second_secfpn_8xb4-cyclic-20e_nus-3d.py","bevfusion_converted.pth","--cam-type=all","--score-thr=0.2","--show"],
+            "justMyCode": false
+
+        }
+    ]
+}
 ```
 

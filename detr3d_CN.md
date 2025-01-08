@@ -397,9 +397,7 @@ tools/dist_test.sh projects/configs/detr3d/detr3d_res101_gridmask.py /path/to/ck
                 "ckpt/detr3d_resnet101.pth",
                 "--eval=bbox"
                 ],
-            ],
             "justMyCode": false
-
         }
     ]
 }
