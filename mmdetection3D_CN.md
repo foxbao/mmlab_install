@@ -1,6 +1,8 @@
 [TOC] 
 参考了以下网页
-https://blog.csdn.net/newbie_dqt/article/details/134766294
+https://blog.csdn.net/weixin_42545475/article/details/132422665
+
+https://mmcv.readthedocs.io/en/v1.5.0/get_started/installation.html
 
 # 安装nvidia驱动
 如果有旧的驱动，或者进不了桌面，先卸载旧的驱动
@@ -50,8 +52,8 @@ sudo sh cuda_11.3.0_465.19.01_linux.run
 
 # 创建conda环境
 ```
-conda create -n mmpretrain python=3.8 -y
-conda activate mmpretrain
+conda create -n mmdetection3d python=3.8 -y
+conda activate mmdetection3d
 ```
 
 # 安装 Pytroch 1.10.0
@@ -73,64 +75,51 @@ torchvision                          0.11.0+cu113
 确认安装的torch版本是1.10.0
 
 
-# 下载 mmpretrain
+
+# 安装mmengine
 ```
-git clone https://github.com/open-mmlab/mmpretrain.git
-cd mmpretrain
-git checkout v1.0.0rc6
-pip install -v e .
+pip install mmengine
 ```
 
-# 下载安装 mmengine 0.7.1
+# 安装mmcv
 ```
-pip install mmengine==0.7.1
+pip install mmcv==2.0.0rc4 -f https://download.openmmlab.com/mmcv/dist/cu113/torch1.10/index.html
 ```
 
-# 安装 mmcv v2.0.0rc4
-
+# 安装mmdet
 ```
-pip install mmcv==2.0.0rc4 -f https://download.openmmlab.com/mmcv/dist/cu113/torch1.10.0/index.html
+pip install mmdet==3.0.0
 ```
 
 
-# 测试
+# 下载 mmdetection3d
 ```
-python demo/image_demo.py demo/demo.JPEG resnet18_8xb32_in1k
-```
-
-# 准备数据
-参考
-https://mmpretrain.readthedocs.io/en/latest/user_guides/dataset_prepare.html
-
-
-# 单GPU训练
-
-1. 命令行模式
-```
-bash local_train.sh sparse4dv3_temporal_r50_1x8_bs6_256x704
+git clone https://github.com/open-mmlab/mmdetection3d.git
+cd mmdetection3d
+git checkout dev-1.x
+pip install -v -e .
 ```
 
-2. vscode的launch.json配置模式
+# 验证安装
+1. 下载配置文件和模型权重文件
 ```
-{
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "Python Debugger: Current File with Arguments",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "tools/train.py",
-            "console": "integratedTerminal",
-            "cwd": "${workspaceFolder}",
-            "env":{
-                "PYTHONPATH":"${workspaceFolder}"
-            },
-            "args": ["configs/vision_transformer/vit-base-p16_ft-64xb64_in1k-384.py"],
-            "justMyCode": false
-
-        }
-    ]
-}
+pip install -U openmim
+mim download mmdet3d --config pointpillars_hv_secfpn_8xb6-160e_kitti-3d-car --dest .
 ```
 
+2. 推理验证
+方法一：命令行推理
+```
+python demo/pcd_demo.py demo/data/kitti/000008.bin pointpillars_hv_secfpn_8xb6-160e_kitti-3d-car.py hv_pointpillars_secfpn_6x8_160e_kitti-3d-car_20220331_134606-d42d15ed.pth --show
+```
+
+方法二：api推理
+```
+from mmdet3d.apis import init_model, inference_detector
+
+config_file = 'pointpillars_hv_secfpn_8xb6-160e_kitti-3d-car.py'
+checkpoint_file = 'hv_pointpillars_secfpn_6x8_160e_kitti-3d-car_20220331_134606-d42d15ed.pth'
+model = init_model(config_file, checkpoint_file)
+inference_detector(model, 'demo/data/kitti/000008.bin')
+```
 

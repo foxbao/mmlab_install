@@ -451,6 +451,14 @@ tools/dist_test.sh projects/configs/detr3d/detr3d_res101_gridmask.py /path/to/ck
 
 
 
+
+# 单帧推理
+
+
+
+
+
+
 # 在nuscenes数据集上进行测试
 
 https://blog.csdn.net/Furtherisxgi/article/details/130118952
