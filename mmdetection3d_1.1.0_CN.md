@@ -33,6 +33,11 @@ wget https://developer.download.nvidia.com/compute/cuda/11.3.0/local_installers/
 sudo sh cuda_11.3.0_465.19.01_linux.run
 ```
 
+如果出现gcc相关error，命令改为
+```
+sudo sh cuda_11.3.0_465.19.01_linux.run --override
+```
+
 # 创建conda环境
 ```
 conda create -n mmdetection3d python=3.8 -y
@@ -74,12 +79,10 @@ pip install mmcv==2.0.0rc4 -f https://download.openmmlab.com/mmcv/dist/cu113/tor
 pip install mmdet==3.0.0
 ```
 
-
 # 下载 mmdetection3d
 ```
-git clone https://github.com/open-mmlab/mmdetection3d.git
+git clone https://github.com/open-mmlab/mmdetection3d.git -b dev-1.x
 cd mmdetection3d
-git checkout dev-1.x
 pip install -v -e .
 ```
 
