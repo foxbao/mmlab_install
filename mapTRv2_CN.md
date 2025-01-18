@@ -3,6 +3,14 @@
 https://blog.csdn.net/qq_45907168/article/details/138803978
 https://blog.csdn.net/h904798869/article/details/132856083
 
+# 安装 gcc 12 and g++ 12
+参考了以下网页
+https://blog.csdn.net/qq_42059060/article/details/135677793
+```
+sudo apt-get install gcc-12
+sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 12
+```
+
 # 安装 CUDA 11.3
 要注意安装的CUDA版本要和之后安装的Pytorch版本一致
 ```
