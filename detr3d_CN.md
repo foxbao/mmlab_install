@@ -1,28 +1,36 @@
+# Detr3d 算法部署指南
+
 [TOC] 
 参考了以下网页
 https://blog.csdn.net/weixin_42545475/article/details/132422665
 
 https://mmcv.readthedocs.io/en/v1.5.0/get_started/installation.html
 
-# 安装nvidia驱动
+## 安装nvidia驱动
+
 如果有旧的驱动，或者进不了桌面，先卸载旧的驱动
-```
+
+```bash
 cd /usr/bin/
 sudo ./nvidia-installer --uninstall
 ```
+
 进入终端并且切换到init 模式安装，避免出现xserver的警告
-```
+
+```bash
 ctr+alt+F3
 sudo init 3
 sudo ./NVIDIA-Linux-x86_64-550.90.07.run
 ```
+
 切记，安装后有两个选择,32 compatibility和auto的，都选No
 
+## 安装 gcc 8 and g++ 8
 
-# 安装 gcc 8 and g++ 8
 参考了以下网页
-https://askubuntu.com/questions/1446863/trying-to-install-gcc-8-and-g-8-on-ubuntu-22-04
-```
+<https://askubuntu.com/questions/1446863/trying-to-install-gcc-8-and-g-8-on-ubuntu-22-04>
+
+```bash
 sudo apt update
 wget http://mirrors.kernel.org/ubuntu/pool/universe/g/gcc-8/gcc-8_8.4.0-3ubuntu2_amd64.deb
 wget http://mirrors.edge.kernel.org/ubuntu/pool/universe/g/gcc-8/gcc-8-base_8.4.0-3ubuntu2_amd64.deb
